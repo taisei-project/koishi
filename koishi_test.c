@@ -51,6 +51,29 @@ void *cofunc2(void *data) {
 	return NULL;
 }
 
+void test1(koishi_coroutine_t *c) {
+	char *str;
+	koishi_init(c, 128 * 1024, cofunc1);
+	printf("O: created coroutine\n");
+	printf("O: resume 1\n");
+	str = koishi_resume(c, "Hello");
+	printf("O: post yield 1 (got %s)\n", str);
+}
+
+void test2(koishi_coroutine_t *c) {
+	intptr_t i;
+	koishi_recycle(c, cofunc2);
+	assert(koishi_state(c) == KOISHI_SUSPENDED);
+	printf("O: recycled coroutine\n");
+	printf("O: resume 1\n");
+	i = (intptr_t)koishi_resume(c, (void*)1);
+	printf("O: post yield 1 (got %zi)\n", (size_t)i);
+	printf("O: resume 2\n");
+	i = (intptr_t)koishi_resume(c, (void*)2);
+	printf("O: post yield 2 (got %zi)\n", (size_t)i);
+	assert(koishi_state(c) == KOISHI_SUSPENDED);
+}
+
 int main(int argc, char **argv) {
 	if(argc != 1) {
 		printf("%s takes no arguments.\n", argv[0]);
@@ -61,11 +84,7 @@ int main(int argc, char **argv) {
 
 	char *str;
 	koishi_coroutine_t co, *c = &co;
-	koishi_init(c, 128 * 1024, cofunc1);
-	printf("O: created coroutine\n");
-	printf("O: resume 1\n");
-	str = koishi_resume(c, "Hello");
-	printf("O: post yield 1 (got %s)\n", str);
+	test1(&co);
 	printf("O: resume 2\n");
 	str = koishi_resume(c, "Hakurei");
 	printf("O: post yield 2 (got %s)\n", str);
@@ -78,19 +97,7 @@ int main(int argc, char **argv) {
 	assert(koishi_state(c) == KOISHI_DEAD);
 
 	assert(koishi_state(koishi_active()) == KOISHI_RUNNING);
-
-	intptr_t i;
-	koishi_recycle(c, cofunc2);
-	assert(koishi_state(c) == KOISHI_SUSPENDED);
-	printf("O: recycled coroutine\n");
-	printf("O: resume 1\n");
-	i = (intptr_t)koishi_resume(c, (void*)1);
-	printf("O: post yield 1 (got %zi)\n", (size_t)i);
-	printf("O: resume 2\n");
-	i = (intptr_t)koishi_resume(c, (void*)2);
-	printf("O: post yield 2 (got %zi)\n", (size_t)i);
-	assert(koishi_state(c) == KOISHI_SUSPENDED);
-
+	test2(&co);
 	koishi_deinit(c);
 
 	return 0;

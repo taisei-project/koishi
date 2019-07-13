@@ -41,7 +41,7 @@ static KOISHI_THREAD_LOCAL koishi_coroutine_t *co_current;
 static inline void co_return(koishi_coroutine_t *co, int state) {
 	assert(co->caller->state == KOISHI_SUSPENDED);
 	co->caller->state = KOISHI_RUNNING;
-	jump_fcontext(co->caller->fctx, (void*)(uintptr_t)state);
+	co->caller->fctx = jump_fcontext(co->caller->fctx, (void*)(uintptr_t)state).fctx;
 }
 
 static inline void co_jump(koishi_coroutine_t *co) {
