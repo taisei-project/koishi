@@ -3,7 +3,7 @@ koishi_src = files(
     'stack_alloc.c',
 )
 
-backends = ['fcontext', 'win32fiber']
+backends = ['fcontext', 'win32fiber', 'ucontext']
 
 foreach i : backends
     subdir(i)
