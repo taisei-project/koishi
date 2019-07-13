@@ -1,0 +1,13 @@
+option(
+    'impl',
+    type : 'combo',
+    choices : ['auto', 'fcontext', 'win32fiber'],
+    description : 'Which implementation to use'
+)
+
+option(
+    'threadsafe',
+    type : 'boolean',
+    value : true,
+    description : 'Whether multiple coroutines can be ran on different threads at once (needs compiler support)'
+)
