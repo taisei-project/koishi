@@ -151,6 +151,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga41f0ca7dfb2a571e5950acd7ae56ea2b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="koishi_8h.html#a7f88f857cd21250db8e0821d1f43c8b4">KOISHI_API</a> <a class="el" href="koishi_8h.html#a48f9e69334b4c2dfae60a13f113435a9">KOISHI_NORETURN</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__coroutine.html#ga41f0ca7dfb2a571e5950acd7ae56ea2b">koishi_die</a> (void *arg)</td></tr>
 <tr class="memdesc:ga41f0ca7dfb2a571e5950acd7ae56ea2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return from the currently running coroutine.  <a href="#ga41f0ca7dfb2a571e5950acd7ae56ea2b">More...</a><br /></td></tr>
 <tr class="separator:ga41f0ca7dfb2a571e5950acd7ae56ea2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac0187a5776ae52f254af9b55943b8e59"><td class="memItemLeft" align="right" valign="top"><a class="el" href="koishi_8h.html#a7f88f857cd21250db8e0821d1f43c8b4">KOISHI_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__coroutine.html#gac0187a5776ae52f254af9b55943b8e59">koishi_kill</a> (<a class="el" href="group__coroutine.html#structkoishi__coroutine__t">koishi_coroutine_t</a> *co)</td></tr>
+<tr class="memdesc:gac0187a5776ae52f254af9b55943b8e59"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop a coroutine.  <a href="#gac0187a5776ae52f254af9b55943b8e59">More...</a><br /></td></tr>
+<tr class="separator:gac0187a5776ae52f254af9b55943b8e59"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad5acf510811169d82aa7d204dcd274f1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="koishi_8h.html#a7f88f857cd21250db8e0821d1f43c8b4">KOISHI_API</a> int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__coroutine.html#gad5acf510811169d82aa7d204dcd274f1">koishi_state</a> (<a class="el" href="group__coroutine.html#structkoishi__coroutine__t">koishi_coroutine_t</a> *co)</td></tr>
 <tr class="memdesc:gad5acf510811169d82aa7d204dcd274f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query the state of a coroutine.  <a href="#gad5acf510811169d82aa7d204dcd274f1">More...</a><br /></td></tr>
 <tr class="separator:gad5acf510811169d82aa7d204dcd274f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -357,7 +360,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Return from the currently running coroutine. </p>
-<p>Like <a class="el" href="group__coroutine.html#gaa857eabd4eadf8d4c2f78aa3f72960f2" title="Suspend the currently running coroutine.">koishi_yield</a>, except the coroutine is put into the KOISHI_DEAD state and may not be resumed again. For that reason, this function does not return. This is equivalent to returning from the entry point.</p>
+<p>Like <a class="el" href="group__coroutine.html#gaa857eabd4eadf8d4c2f78aa3f72960f2" title="Suspend the currently running coroutine.">koishi_yield</a>, except the coroutine is put into the <a class="el" href="group__coroutine.html#gga5ee080912352fa1fd99d025f278f47d0ada9bc1c2cf220958875508098b3ad4bf">KOISHI_DEAD</a> state and may not be resumed again. For that reason, this function does not return. This is equivalent to returning from the entry point.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">arg</td><td>Value to return from the corresponding <a class="el" href="group__coroutine.html#gaf9791f780463a43dc3e29a52dc8cc9ae" title="Resume a suspended coroutine.">koishi_resume</a> call. </td></tr>
@@ -407,6 +410,33 @@ Functions</h2></td></tr>
     <tr><td class="paramname">co</td><td>The coroutine to initialize. </td></tr>
     <tr><td class="paramname">min_stack_size</td><td>Minimum size of the stack. The actual size will be a multiple of the system page size and at least two pages big. If 0, the default size will be used (currently 65536). </td></tr>
     <tr><td class="paramname">entry_point</td><td>Function that will be called when the coroutine is first resumed. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gac0187a5776ae52f254af9b55943b8e59"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac0187a5776ae52f254af9b55943b8e59">&#9670;&nbsp;</a></span>koishi_kill()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="koishi_8h.html#a7f88f857cd21250db8e0821d1f43c8b4">KOISHI_API</a> void koishi_kill </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__coroutine.html#structkoishi__coroutine__t">koishi_coroutine_t</a> *&#160;</td>
+          <td class="paramname"><em>co</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Stop a coroutine. </p>
+<p>Puts <code>co</code> into the <a class="el" href="group__coroutine.html#gga5ee080912352fa1fd99d025f278f47d0ada9bc1c2cf220958875508098b3ad4bf">KOISHI_DEAD</a> state, indicating that it must not be resumed again. If <code>co</code> is the currently running coroutine, then this is equivalent to calling <a class="el" href="group__coroutine.html#ga41f0ca7dfb2a571e5950acd7ae56ea2b" title="Return from the currently running coroutine.">koishi_die</a> with NULL as the argument.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">co</td><td>The coroutine to stop. </td></tr>
   </table>
   </dd>
 </dl>

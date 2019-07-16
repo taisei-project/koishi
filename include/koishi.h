@@ -196,13 +196,24 @@ KOISHI_API void *koishi_yield(void *arg);
 /**
  * @brief Return from the currently running coroutine.
  *
- * Like #koishi_yield, except the coroutine is put into the KOISHI_DEAD state
+ * Like #koishi_yield, except the coroutine is put into the #KOISHI_DEAD state
  * and may not be resumed again. For that reason, this function does not return.
  * This is equivalent to returning from the entry point.
  *
  * @param arg Value to return from the corresponding #koishi_resume call.
  */
 KOISHI_API KOISHI_NORETURN void koishi_die(void *arg);
+
+/**
+ * @brief Stop a coroutine.
+ *
+ * Puts @p co into the #KOISHI_DEAD state, indicating that it must not be resumed
+ * again. If @p co is the currently running coroutine, then this is equivalent
+ * to calling #koishi_die with NULL as the argument.
+ *
+ * @param co The coroutine to stop.
+ */
+KOISHI_API void koishi_kill(koishi_coroutine_t *co);
 
 /**
  * @brief Query the state of a coroutine.

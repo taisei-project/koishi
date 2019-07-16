@@ -9,6 +9,7 @@ var searchData=
   ['koishi_5fdie',['koishi_die',['../group__coroutine.html#ga41f0ca7dfb2a571e5950acd7ae56ea2b',1,'koishi.h']]],
   ['koishi_5fentrypoint_5ft',['koishi_entrypoint_t',['../group__coroutine.html#gae2b61aed9a9a639c4fbbca24b8baec53',1,'koishi.h']]],
   ['koishi_5finit',['koishi_init',['../group__coroutine.html#ga5edb12b7059120bd60dc8caabfb57704',1,'koishi.h']]],
+  ['koishi_5fkill',['koishi_kill',['../group__coroutine.html#gac0187a5776ae52f254af9b55943b8e59',1,'koishi.h']]],
   ['koishi_5fnoreturn',['KOISHI_NORETURN',['../koishi_8h.html#a48f9e69334b4c2dfae60a13f113435a9',1,'koishi.h']]],
   ['koishi_5frecycle',['koishi_recycle',['../group__coroutine.html#ga712ad3739f7b89cfe0fac54b4fbd10ea',1,'koishi.h']]],
   ['koishi_5fresume',['koishi_resume',['../group__coroutine.html#gaf9791f780463a43dc3e29a52dc8cc9ae',1,'koishi.h']]],

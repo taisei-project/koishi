@@ -96,6 +96,15 @@ KOISHI_API KOISHI_NORETURN void koishi_die(void *arg) {
 	KOISHI_UNREACHABLE;
 }
 
+KOISHI_API void koishi_kill(koishi_coroutine_t *co) {
+	if(co == koishi_active()) {
+		koishi_die(NULL);
+	} else {
+		assert(co->state == KOISHI_SUSPENDED);
+		co->state = KOISHI_DEAD;
+	}
+}
+
 KOISHI_API int koishi_state(koishi_coroutine_t *co) {
 	return co->state;
 }
