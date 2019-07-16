@@ -94,6 +94,14 @@ KOISHI_API void *koishi_yield(void *arg) {
 	return co->userdata;
 }
 
+KOISHI_API KOISHI_NORETURN void koishi_die(void *arg) {
+	koishi_coroutine_t *co = koishi_active();
+	assert(co->state == KOISHI_RUNNING);
+	co->userdata = arg;
+	co_return(co, KOISHI_DEAD);
+	KOISHI_UNREACHABLE;
+}
+
 KOISHI_API void koishi_deinit(koishi_coroutine_t *co) {
 	if(co->stack) {
 		free_stack(co->stack, co->stack_size);

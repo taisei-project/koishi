@@ -121,6 +121,9 @@ Macros</h2></td></tr>
 <tr class="memitem:a7f88f857cd21250db8e0821d1f43c8b4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="koishi_8h.html#a7f88f857cd21250db8e0821d1f43c8b4">KOISHI_API</a></td></tr>
 <tr class="memdesc:a7f88f857cd21250db8e0821d1f43c8b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Annotates all publicly visible API functions.  <a href="#a7f88f857cd21250db8e0821d1f43c8b4">More...</a><br /></td></tr>
 <tr class="separator:a7f88f857cd21250db8e0821d1f43c8b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48f9e69334b4c2dfae60a13f113435a9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="koishi_8h.html#a48f9e69334b4c2dfae60a13f113435a9">KOISHI_NORETURN</a></td></tr>
+<tr class="memdesc:a48f9e69334b4c2dfae60a13f113435a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Annotates API functions that don't return to their callers.  <a href="#a48f9e69334b4c2dfae60a13f113435a9">More...</a><br /></td></tr>
+<tr class="separator:a48f9e69334b4c2dfae60a13f113435a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
@@ -158,6 +161,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gaa857eabd4eadf8d4c2f78aa3f72960f2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="koishi_8h.html#a7f88f857cd21250db8e0821d1f43c8b4">KOISHI_API</a> void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__coroutine.html#gaa857eabd4eadf8d4c2f78aa3f72960f2">koishi_yield</a> (void *arg)</td></tr>
 <tr class="memdesc:gaa857eabd4eadf8d4c2f78aa3f72960f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Suspend the currently running coroutine.  <a href="group__coroutine.html#gaa857eabd4eadf8d4c2f78aa3f72960f2">More...</a><br /></td></tr>
 <tr class="separator:gaa857eabd4eadf8d4c2f78aa3f72960f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga41f0ca7dfb2a571e5950acd7ae56ea2b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="koishi_8h.html#a7f88f857cd21250db8e0821d1f43c8b4">KOISHI_API</a> <a class="el" href="koishi_8h.html#a48f9e69334b4c2dfae60a13f113435a9">KOISHI_NORETURN</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__coroutine.html#ga41f0ca7dfb2a571e5950acd7ae56ea2b">koishi_die</a> (void *arg)</td></tr>
+<tr class="memdesc:ga41f0ca7dfb2a571e5950acd7ae56ea2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return from the currently running coroutine.  <a href="group__coroutine.html#ga41f0ca7dfb2a571e5950acd7ae56ea2b">More...</a><br /></td></tr>
+<tr class="separator:ga41f0ca7dfb2a571e5950acd7ae56ea2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad5acf510811169d82aa7d204dcd274f1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="koishi_8h.html#a7f88f857cd21250db8e0821d1f43c8b4">KOISHI_API</a> int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__coroutine.html#gad5acf510811169d82aa7d204dcd274f1">koishi_state</a> (<a class="el" href="group__coroutine.html#structkoishi__coroutine__t">koishi_coroutine_t</a> *co)</td></tr>
 <tr class="memdesc:gad5acf510811169d82aa7d204dcd274f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query the state of a coroutine.  <a href="group__coroutine.html#gad5acf510811169d82aa7d204dcd274f1">More...</a><br /></td></tr>
 <tr class="separator:gad5acf510811169d82aa7d204dcd274f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -187,6 +193,24 @@ Functions</h2></td></tr>
 <p>Annotates all publicly visible API functions. </p>
 
 <p class="definition">Definition at line <a class="el" href="koishi_8h_source.html#l00020">20</a> of file <a class="el" href="koishi_8h_source.html">koishi.h</a>.</p>
+
+</div>
+</div>
+<a id="a48f9e69334b4c2dfae60a13f113435a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48f9e69334b4c2dfae60a13f113435a9">&#9670;&nbsp;</a></span>KOISHI_NORETURN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define KOISHI_NORETURN</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Annotates API functions that don't return to their callers. </p>
+
+<p class="definition">Definition at line <a class="el" href="koishi_8h_source.html#l00034">34</a> of file <a class="el" href="koishi_8h_source.html">koishi.h</a>.</p>
 
 </div>
 </div>

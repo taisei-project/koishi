@@ -21,6 +21,27 @@
 	#endif
 #endif
 
+/**
+ * @brief Annotates API functions that don't return to their callers
+ */
+#if defined __STDC_VERSION__ && __STDC_VERSION__ >= 201112L
+	#define KOISHI_NORETURN _Noreturn
+#elif defined __cplusplus && __cplusplus >= 201103L
+	#define KOISHI_NORETURN [[noreturn]]
+#elif defined __GNUC__ || defined __clang__
+	#define KOISHI_NORETURN __attribute__((__noreturn__))
+#else
+	#define KOISHI_NORETURN
+#endif
+
+#if defined BUILDING_KOISHI
+	#if defined NDEBUG && (defined __GNUC__ || defined __clang__)
+		#define KOISHI_UNREACHABLE __builtin_unreachable()
+	#else
+		#define KOISHI_UNREACHABLE assert(0 && "This code path should never be reached")
+	#endif
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -171,6 +192,17 @@ KOISHI_API void *koishi_resume(koishi_coroutine_t *co, void *arg);
  * @return Value passed to a future #koishi_resume call.
  */
 KOISHI_API void *koishi_yield(void *arg);
+
+/**
+ * @brief Return from the currently running coroutine.
+ *
+ * Like #koishi_yield, except the coroutine is put into the KOISHI_DEAD state
+ * and may not be resumed again. For that reason, this function does not return.
+ * This is equivalent to returning from the entry point.
+ *
+ * @param arg Value to return from the corresponding #koishi_resume call.
+ */
+KOISHI_API KOISHI_NORETURN void koishi_die(void *arg);
 
 /**
  * @brief Query the state of a coroutine.

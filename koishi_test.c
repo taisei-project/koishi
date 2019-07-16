@@ -19,7 +19,8 @@ void *cofunc1(void *data) {
 	str = koishi_yield("Youmu");
 	printf("C: resumed 3 (got %s)\n", str);
 	printf("C: done\n");
-	return "Bye";
+	koishi_die("Bye");
+	// return "Bye";
 }
 
 void *cofunc_nested(void *data) {

@@ -85,6 +85,17 @@ KOISHI_API void *koishi_yield(void *arg) {
 	return co->userdata;
 }
 
+KOISHI_API KOISHI_NORETURN void koishi_die(void *arg) {
+	koishi_coroutine_t *co = koishi_active();
+	assert(co->state == KOISHI_RUNNING);
+	co->userdata = arg;
+	co->caller->state = KOISHI_RUNNING;
+	co->state = KOISHI_DEAD;
+	co_current = co->caller;
+	SwitchToFiber(co->caller->fiber);
+	KOISHI_UNREACHABLE;
+}
+
 KOISHI_API int koishi_state(koishi_coroutine_t *co) {
 	return co->state;
 }
