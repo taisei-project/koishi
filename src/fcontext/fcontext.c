@@ -67,11 +67,22 @@ static void co_entry(transfer_t tf) {
 KOISHI_API void koishi_init(koishi_coroutine_t *co, size_t min_stack_size, koishi_entrypoint_t entry_point) {
 	co->state = KOISHI_SUSPENDED;
 	co->stack = alloc_stack(min_stack_size, &co->stack_size);
+
+	#if defined KOISHI_ASAN
+	// ASan may get confused if the same memory region was previously used for a stack, event if it gets unmapped/free'd.
+	ASAN_UNPOISON_MEMORY_REGION(co->stack, co->stack_size);
+	#endif
+
 	co->fctx = make_fcontext((char*)co->stack + co->stack_size, co->stack_size, co_entry);
 	co->entry = entry_point;
 }
 
 KOISHI_API void koishi_recycle(koishi_coroutine_t *co, koishi_entrypoint_t entry_point) {
+	#if defined KOISHI_ASAN
+	// ASan may get confused by the stack reuse and spit out stack-use-after-scope false positives.
+	ASAN_UNPOISON_MEMORY_REGION(co->stack, co->stack_size);
+	#endif
+
 	co->state = KOISHI_SUSPENDED;
 	co->fctx = make_fcontext((char*)co->stack + co->stack_size, co->stack_size, co_entry);
 	co->entry = entry_point;
