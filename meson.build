@@ -63,6 +63,14 @@ if cc.has_function('getpagesize', args : feature_args)
     can_get_page_size = true
 endif
 
+if cc.has_function('aligned_alloc', args : feature_args)
+    koishi_args += ['-DKOISHI_HAVE_ALIGNED_ALLOC']
+endif
+
+if cc.has_function('posix_memalign', args : feature_args)
+    koishi_args += ['-DKOISHI_HAVE_POSIX_MEMALIGN']
+endif
+
 if os_is_windows
     koishi_args += '-DKOISHI_HAVE_WIN32API'
     can_get_page_size = true

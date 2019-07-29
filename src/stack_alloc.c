@@ -42,7 +42,14 @@ static inline void *alloc_stack_mem(size_t size) {
 	return mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | KOISHI_MAP_ANONYMOUS, -1, 0);
 #elif defined KOISHI_HAVE_WIN32API
 	return VirtualAlloc(NULL, size, MEM_COMMIT, PAGE_READWRITE);
+#elif defined KOISHI_HAVE_ALIGNED_ALLOC
+	return aligned_alloc(koishi_util_page_size(), size);
+#elif defined KOISHI_HAVE_POSIX_MEMALIGN
+	void *p = NULL;
+	posix_memalign(&p, koishi_util_page_size(), size);
+	return p;
 #else
+	#pragma GCC warning "Stack will not be aligned to page size"
 	return calloc(1, size);
 #endif
 }
