@@ -1,11 +1,15 @@
 
 ucontext_supported = true
 
-foreach sym : ['ucontext_t', 'getcontext', 'makecontext', 'swapcontext']
-    if not cc.has_header_symbol('ucontext.h', sym, args : feature_args)
-        ucontext_supported = false
-    endif
-endforeach
+if not cc.has_header_symbol('ucontext.h', 'ucontext_t', args : feature_args)
+    ucontext_supported = false
+else
+    foreach fun : ['getcontext', 'makecontext', 'swapcontext']
+        if not cc.has_function(fun, args : feature_args)
+            ucontext_supported = false
+        endif
+    endforeach
+endif
 
 ucontext_src = files('ucontext.c')
 ucontext_args = []

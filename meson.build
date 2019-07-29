@@ -38,7 +38,7 @@ else
     koishi_args += ['-DKOISHI_THREAD_LOCAL=']
 endif
 
-if cc.has_header_symbol('sys/mman.h', 'mmap', args : feature_args)
+if cc.has_function('mmap', args : feature_args)
     if cc.has_header_symbol('sys/mman.h', 'MAP_ANONYMOUS', args : feature_args)
         koishi_args += ['-DKOISHI_HAVE_MMAP', '-DKOISHI_MAP_ANONYMOUS=MAP_ANONYMOUS']
     elif cc.has_header_symbol('sys/mman.h', 'MAP_ANON', args : feature_args)
@@ -48,7 +48,7 @@ endif
 
 can_get_page_size = false
 
-if cc.has_header_symbol('unistd.h', 'sysconf', args : feature_args)
+if cc.has_function('sysconf', args : feature_args)
     if cc.has_header_symbol('unistd.h', '_SC_PAGE_SIZE', args : feature_args)
         koishi_args += ['-DKOISHI_HAVE_SYSCONF', '-DKOISHI_SC_PAGE_SIZE=_SC_PAGE_SIZE']
         can_get_page_size = true
@@ -58,7 +58,7 @@ if cc.has_header_symbol('unistd.h', 'sysconf', args : feature_args)
     endif
 endif
 
-if cc.has_header_symbol('unistd.h', 'getpagesize', args : feature_args)
+if cc.has_function('getpagesize', args : feature_args)
     koishi_args += '-DKOISHI_HAVE_GETPAGESIZE'
     can_get_page_size = true
 endif
