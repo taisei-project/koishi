@@ -8,15 +8,8 @@
 typedef void *fiber_t;
 
 struct koishi_coroutine {
-	union {
-		struct {
-			koishi_entrypoint_t entry;
-			void *userdata;
-		};
-
-		char _safeguard[offsetof(struct koishi_coroutine_pub, _private)];
-	};
-
+	koishi_entrypoint_t entry;
+	void *userdata;
 	koishi_coroutine_t *caller;
 	fiber_t fiber;
 	size_t stack_size;

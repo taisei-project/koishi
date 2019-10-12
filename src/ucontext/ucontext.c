@@ -6,15 +6,8 @@
 #include "../stack_alloc.h"
 
 struct koishi_coroutine {
-	union {
-		struct {
-			koishi_entrypoint_t entry;
-			koishi_coroutine_t *caller;
-		};
-
-		char _safeguard[offsetof(struct koishi_coroutine_pub, _private)];
-	};
-
+	koishi_entrypoint_t entry;
+	koishi_coroutine_t *caller;
 	ucontext_t *uctx;
 	void *userdata;
 	int state;

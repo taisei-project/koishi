@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['_5fprivate',['_private',['../group__coroutine.html#ae93cdb4a8043f7e76daed02eae9fa01a',1,'koishi_coroutine_t']]]
+  ['_5fprivate',['_private',['../group__coroutine.html#aa7cd7be1e654f74d2a3587a0d3c5dcd7',1,'koishi_coroutine_t']]]
 ];

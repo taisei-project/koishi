@@ -1,8 +1,7 @@
 var group__coroutine =
 [
     [ "koishi_coroutine_t", "group__coroutine.html#structkoishi__coroutine__t", [
-      [ "_private", "group__coroutine.html#ae93cdb4a8043f7e76daed02eae9fa01a", null ],
-      [ "recycle_safe", "group__coroutine.html#a7c10f3aa5472cd7e66491a361ccd702e", null ]
+      [ "_private", "group__coroutine.html#aa7cd7be1e654f74d2a3587a0d3c5dcd7", null ]
     ] ],
     [ "koishi_entrypoint_t", "group__coroutine.html#gae2b61aed9a9a639c4fbbca24b8baec53", null ],
     [ "koishi_state", "group__coroutine.html#ga5ee080912352fa1fd99d025f278f47d0", [

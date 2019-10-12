@@ -17,15 +17,8 @@ fcontext_t FCONTEXT_CALL make_fcontext(void *sp, size_t size, void (*fn)(transfe
 transfer_t FCONTEXT_CALL ontop_fcontext(const fcontext_t to, void *vp, transfer_t (*fn)(transfer_t));
 
 struct koishi_coroutine {
-	union {
-		struct {
-			fcontext_t fctx;
-			koishi_coroutine_t *caller;
-		};
-
-		char _safeguard[offsetof(struct koishi_coroutine_pub, _private)];
-	};
-
+	fcontext_t fctx;
+	koishi_coroutine_t *caller;
 	koishi_entrypoint_t entry;
 	void *userdata;
 	void *stack;

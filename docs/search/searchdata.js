@@ -1,10 +1,10 @@
 var indexSectionsWithContent =
 {
-  0: "_akru",
+  0: "_aku",
   1: "k",
   2: "k",
   3: "k",
-  4: "_r",
+  4: "_",
   5: "k",
   6: "k",
   7: "k",

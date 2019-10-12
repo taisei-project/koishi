@@ -177,20 +177,16 @@ Functions</h2></td></tr>
 <div class="textblock"><p>A coroutine instance. </p>
 <p>This struct must be initialized with <a class="el" href="group__coroutine.html#ga5edb12b7059120bd60dc8caabfb57704" title="Initialize a koishi_coroutine_t structure.">koishi_init</a> before use. </p>
 
-<p class="definition">Definition at line <a class="el" href="koishi_8h_source.html#l00074">74</a> of file <a class="el" href="koishi_8h_source.html">koishi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="koishi_8h_source.html#l00083">83</a> of file <a class="el" href="koishi_8h_source.html">koishi.h</a>.</p>
 </div><table class="memberdecls">
-<tr><td colspan="2"><h3>Data Fields</h3></td></tr>
-<tr class="memitem:a7c10f3aa5472cd7e66491a361ccd702e"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__coroutine.html#a7c10f3aa5472cd7e66491a361ccd702e">recycle_safe</a> [2]</td></tr>
-<tr class="memdesc:a7c10f3aa5472cd7e66491a361ccd702e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Recycle-safe data region.  <a href="#a7c10f3aa5472cd7e66491a361ccd702e">More...</a><br /></td></tr>
-<tr class="separator:a7c10f3aa5472cd7e66491a361ccd702e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><h3>Private Attributes</h3></td></tr>
-<tr class="memitem:ae93cdb4a8043f7e76daed02eae9fa01a"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__coroutine.html#ae93cdb4a8043f7e76daed02eae9fa01a">_private</a> [6]</td></tr>
-<tr class="memdesc:ae93cdb4a8043f7e76daed02eae9fa01a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Private data reserved for the implementation. Don't mess with it.  <a href="#ae93cdb4a8043f7e76daed02eae9fa01a">More...</a><br /></td></tr>
-<tr class="separator:ae93cdb4a8043f7e76daed02eae9fa01a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7cd7be1e654f74d2a3587a0d3c5dcd7"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__coroutine.html#aa7cd7be1e654f74d2a3587a0d3c5dcd7">_private</a> [8]</td></tr>
+<tr class="memdesc:aa7cd7be1e654f74d2a3587a0d3c5dcd7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Private data reserved for the implementation. Don't mess with it.  <a href="#aa7cd7be1e654f74d2a3587a0d3c5dcd7">More...</a><br /></td></tr>
+<tr class="separator:aa7cd7be1e654f74d2a3587a0d3c5dcd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h4 class="groupheader">Field Documentation</h4>
-<a id="ae93cdb4a8043f7e76daed02eae9fa01a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae93cdb4a8043f7e76daed02eae9fa01a">&#9670;&nbsp;</a></span>_private</h2>
+<a id="aa7cd7be1e654f74d2a3587a0d3c5dcd7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa7cd7be1e654f74d2a3587a0d3c5dcd7">&#9670;&nbsp;</a></span>_private</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -199,7 +195,7 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void* koishi_coroutine_t::_private[6]</td>
+          <td class="memname">void* koishi_coroutine_t::_private[8]</td>
         </tr>
       </table>
   </td>
@@ -211,26 +207,7 @@ Functions</h2></td></tr>
 
 <p>Private data reserved for the implementation. Don't mess with it. </p>
 
-<p class="definition">Definition at line <a class="el" href="koishi_8h_source.html#l00090">90</a> of file <a class="el" href="koishi_8h_source.html">koishi.h</a>.</p>
-
-</div>
-</div>
-<a id="a7c10f3aa5472cd7e66491a361ccd702e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7c10f3aa5472cd7e66491a361ccd702e">&#9670;&nbsp;</a></span>recycle_safe</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void* koishi_coroutine_t::recycle_safe[2]</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Recycle-safe data region. </p>
-<p>When the coroutine is in the <a class="el" href="group__coroutine.html#gga5ee080912352fa1fd99d025f278f47d0ada9bc1c2cf220958875508098b3ad4bf">KOISHI_DEAD</a> state, these fields may be safely aliased and used for any purpose by user code. The coroutine and its stack may then be recycled with <a class="el" href="group__coroutine.html#ga712ad3739f7b89cfe0fac54b4fbd10ea" title="Recycle a previously initialized coroutine.">koishi_recycle</a>. This may be used to implement pooling. Note that the act of recycling will overwrite the user data. </p>
-
-<p class="definition">Definition at line <a class="el" href="koishi_8h_source.html#l00084">84</a> of file <a class="el" href="koishi_8h_source.html">koishi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="koishi_8h_source.html#l00089">89</a> of file <a class="el" href="koishi_8h_source.html">koishi.h</a>.</p>
 
 </div>
 </div>
@@ -261,7 +238,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Value to be returned from the corresponding <a class="el" href="group__coroutine.html#gaf9791f780463a43dc3e29a52dc8cc9ae" title="Resume a suspended coroutine.">koishi_resume</a> call. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="koishi_8h_source.html#l00111">111</a> of file <a class="el" href="koishi_8h_source.html">koishi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="koishi_8h_source.html#l00110">110</a> of file <a class="el" href="koishi_8h_source.html">koishi.h</a>.</p>
 
 </div>
 </div>
@@ -288,7 +265,7 @@ Functions</h2></td></tr>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="koishi_8h_source.html#l00059">59</a> of file <a class="el" href="koishi_8h_source.html">koishi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="koishi_8h_source.html#l00068">68</a> of file <a class="el" href="koishi_8h_source.html">koishi.h</a>.</p>
 
 </div>
 </div>

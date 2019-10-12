@@ -5,15 +5,8 @@
 #include <stdlib.h>
 
 struct koishi_coroutine {
-	union {
-		struct {
-			koishi_coroutine_t *caller;
-			koishi_entrypoint_t entry;
-		};
-
-		char _safeguard[offsetof(struct koishi_coroutine_pub, _private)];
-	};
-
+	koishi_coroutine_t *caller;
+	koishi_entrypoint_t entry;
 	emscripten_coroutine emco;
 	void *userdata;
 	size_t stack_size;

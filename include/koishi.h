@@ -83,20 +83,10 @@ struct koishi_coroutine_pub {
 typedef struct koishi_coroutine {
 #endif
 	/**
-	 * @brief Recycle-safe data region.
-	 *
-	 * When the coroutine is in the #KOISHI_DEAD state, these fields may be safely
-	 * aliased and used for any purpose by user code. The coroutine and its stack
-	 * may then be recycled with #koishi_recycle. This may be used to implement
-	 * pooling. Note that the act of recycling will overwrite the user data.
-	 */
-	void *recycle_safe[2];
-
-	/**
 	 * @brief Private data reserved for the implementation. Don't mess with it.
 	 * @private
 	 */
-	void *_private[6];
+	void *_private[8];
 #ifdef BUILDING_KOISHI
 };
 #else
