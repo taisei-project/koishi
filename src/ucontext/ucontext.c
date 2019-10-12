@@ -19,13 +19,15 @@ static KOISHI_THREAD_LOCAL koishi_coroutine_t co_main;
 static KOISHI_THREAD_LOCAL ucontext_t co_main_uctx;
 static KOISHI_THREAD_LOCAL koishi_coroutine_t *co_current;
 
-void co_entry(void) {
+KOISHI_NORETURN static void co_entry(void) {
 	koishi_coroutine_t *co = co_current;
 	co->userdata = co->entry(co->userdata);
 	co->uctx->uc_link = co->caller->uctx;
 	co->caller->state = KOISHI_RUNNING;
 	co->state = KOISHI_DEAD;
 	co_current = co->caller;
+	swapcontext(co->uctx, co->caller->uctx);
+	KOISHI_UNREACHABLE;
 }
 
 KOISHI_API void koishi_init(koishi_coroutine_t *co, size_t min_stack_size, koishi_entrypoint_t entry_point) {
