@@ -19,14 +19,25 @@ static KOISHI_THREAD_LOCAL koishi_coroutine_t co_main;
 static KOISHI_THREAD_LOCAL ucontext_t co_main_uctx;
 static KOISHI_THREAD_LOCAL koishi_coroutine_t *co_current;
 
+static void jump(koishi_coroutine_t *from, koishi_coroutine_t *to, int state) {
+	koishi_coroutine_t *prev = koishi_active();
+	assert(from->state == KOISHI_RUNNING);
+	assert(to->state == KOISHI_SUSPENDED);
+	assert(prev == from);
+	from->state = state;
+	co_current = to;
+	to->state = KOISHI_RUNNING;
+	swapcontext(from->uctx, to->uctx);
+	assert(co_current == prev);
+	assert(to->state == KOISHI_SUSPENDED || to->state == KOISHI_DEAD);
+	assert(from->state == KOISHI_RUNNING);
+}
+
 KOISHI_NORETURN static void co_entry(void) {
 	koishi_coroutine_t *co = co_current;
 	co->userdata = co->entry(co->userdata);
 	co->uctx->uc_link = co->caller->uctx;
-	co->caller->state = KOISHI_RUNNING;
-	co->state = KOISHI_DEAD;
-	co_current = co->caller;
-	swapcontext(co->uctx, co->caller->uctx);
+	jump(co, co->caller, KOISHI_DEAD);
 	KOISHI_UNREACHABLE;
 }
 
@@ -48,43 +59,24 @@ KOISHI_API void koishi_recycle(koishi_coroutine_t *co, koishi_entrypoint_t entry
 }
 
 KOISHI_API void *koishi_resume(koishi_coroutine_t *co, void *arg) {
-	assert(co->state == KOISHI_SUSPENDED);
-	co->userdata = arg;
-	co->state = KOISHI_RUNNING;
 	koishi_coroutine_t *prev = koishi_active();
+	co->userdata = arg;
 	co->caller = prev;
-	prev->state = KOISHI_SUSPENDED;
-	co_current = co;
-	swapcontext(prev->uctx, co->uctx);
-	assert(co_current == prev);
-	assert(co->caller == prev);
-	assert(co->state == KOISHI_SUSPENDED || co->state == KOISHI_DEAD);
-	assert(co->caller->state == KOISHI_RUNNING);
+	jump(prev, co, KOISHI_SUSPENDED);
 	return co->userdata;
 }
 
 KOISHI_API void *koishi_yield(void *arg) {
 	koishi_coroutine_t *co = koishi_active();
-	assert(co->state == KOISHI_RUNNING);
 	co->userdata = arg;
-	co->caller->state = KOISHI_RUNNING;
-	co->state = KOISHI_SUSPENDED;
-	co_current = co->caller;
-	swapcontext(co->uctx, co->caller->uctx);
-	co_current = co;
-	co->state = KOISHI_RUNNING;
-	co->caller->state = KOISHI_SUSPENDED;
+	jump(co, co->caller, KOISHI_SUSPENDED);
 	return co->userdata;
 }
 
 KOISHI_API KOISHI_NORETURN void koishi_die(void *arg) {
 	koishi_coroutine_t *co = koishi_active();
-	assert(co->state == KOISHI_RUNNING);
 	co->userdata = arg;
-	co->caller->state = KOISHI_RUNNING;
-	co->state = KOISHI_DEAD;
-	co_current = co->caller;
-	swapcontext(co->uctx, co->caller->uctx);
+	jump(co, co->caller, KOISHI_DEAD);
 	KOISHI_UNREACHABLE;
 }
 
