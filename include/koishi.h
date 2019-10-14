@@ -35,6 +35,8 @@
 #endif
 
 #if defined BUILDING_KOISHI
+	#include <stddef.h>
+
 	#if defined NDEBUG && (defined __GNUC__ || defined __clang__)
 		#define KOISHI_UNREACHABLE __builtin_unreachable()
 	#else
@@ -48,6 +50,14 @@
 	#if defined(__SANITIZE_ADDRESS__) || __has_feature(address_sanitizer)
 		#include <sanitizer/asan_interface.h>
 		#define KOISHI_ASAN
+	#endif
+
+	#ifndef offsetof
+		#ifdef __GNUC__
+			#define offsetof(type, field) __builtin_offsetof(type, field)
+		#else
+			#define offsetof(type, field) ((size_t)&(((type *)0)->field))
+		#endif
 	#endif
 #endif
 
