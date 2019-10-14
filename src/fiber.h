@@ -33,17 +33,23 @@ static KOISHI_THREAD_LOCAL koishi_coroutine_t co_main;
 static KOISHI_THREAD_LOCAL koishi_coroutine_t *co_current;
 
 static void koishi_swap_coroutine(koishi_coroutine_t *from, koishi_coroutine_t *to, int state) {
+#if !defined NDEBUG
 	koishi_coroutine_t *prev = koishi_active();
 	assert(from->state == KOISHI_RUNNING);
 	assert(to->state == KOISHI_SUSPENDED);
 	assert(prev == from);
+#endif
+
 	from->state = state;
 	co_current = to;
 	to->state = KOISHI_RUNNING;
 	koishi_fiber_swap(&from->fiber, &to->fiber);
+
+#if !defined NDEBUG
 	assert(co_current == prev);
 	assert(to->state == KOISHI_SUSPENDED || to->state == KOISHI_DEAD);
 	assert(from->state == KOISHI_RUNNING);
+#endif
 }
 
 KOISHI_API void koishi_init(koishi_coroutine_t *co, size_t min_stack_size, koishi_entrypoint_t entry_point) {

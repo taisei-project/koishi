@@ -1,4 +1,6 @@
 
+#undef NDEBUG
+
 #include <koishi.h>
 #include <stdio.h>
 #include <stdint.h>

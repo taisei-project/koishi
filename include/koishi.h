@@ -40,7 +40,7 @@
 	#if defined NDEBUG && (defined __GNUC__ || defined __clang__)
 		#define KOISHI_UNREACHABLE __builtin_unreachable()
 	#else
-		#define KOISHI_UNREACHABLE assert(0 && "This code path should never be reached")
+		#define KOISHI_UNREACHABLE do { assert(0 && "This code path should never be reached"); abort(); } while(0)
 	#endif
 
 	#ifndef __has_feature

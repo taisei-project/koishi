@@ -13,6 +13,17 @@ os = host_machine.system()
 arch = host_machine.cpu_family()
 os_is_windows = (os == 'windows' or os == 'uwp' or os == 'cygwin')
 
+cc = meson.get_compiler('c')
+
+warn_args = cc.get_supported_arguments(
+    '-Wall',
+    '-Wpedantic',
+    '-Werror=implicit-function-declaration',
+    '-Werror=incompatible-pointer-types',
+    '-Wmissing-prototypes',
+    '-Wstrict-prototypes',
+)
+
 feature_args = [
     '-D_BSD_SOURCE',
     '-D_DEFAULT_SOURCE',
@@ -20,10 +31,9 @@ feature_args = [
     '-D_POSIX_C_SOURCE=200809L',
     '-D_XOPEN_SOURCE=700',
 ]
-koishi_args = feature_args + ['-DBUILDING_KOISHI']
-koishi_incdirs = include_directories('include')
 
-cc = meson.get_compiler('c')
+koishi_args = []
+koishi_incdirs = include_directories('include')
 
 if get_option('threadsafe')
     if cc.links('int _Thread_local i; int main() {};', name : '_Thread_local keyword support test')
@@ -81,6 +91,12 @@ if not can_get_page_size
     koishi_args += '-DKOISHI_STATIC_PAGE_SIZE=@0@'.format(static_page_size)
     warning('No way to detect page size at runtime, assuming @0@'.format(static_page_size))
 endif
+
+message('Configuration args: @0@'.format(koishi_args))
+
+koishi_args += ['-DBUILDING_KOISHI']
+koishi_args += feature_args
+koishi_args += warn_args
 
 subdir('src')
 
