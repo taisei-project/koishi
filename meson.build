@@ -12,6 +12,7 @@ soversion = meson.project_version()
 os = host_machine.system()
 arch = host_machine.cpu_family()
 os_is_windows = (os == 'windows' or os == 'uwp' or os == 'cygwin')
+os_is_emscripten = (os == 'emscripten')
 
 cc = meson.get_compiler('c')
 
@@ -98,11 +99,16 @@ koishi_args += ['-DBUILDING_KOISHI']
 koishi_args += feature_args
 koishi_args += warn_args
 
+koishi_external_args = []
+koishi_external_link_args = []
+
 subdir('src')
 
 koishi_dep = declare_dependency(
     include_directories : koishi_incdirs,
     link_with : libkoishi,
+    compile_args : koishi_external_args,
+    link_args : koishi_external_link_args,
 )
 
 if not meson.is_subproject()
@@ -118,7 +124,8 @@ if not meson.is_subproject()
         filebase : meson.project_name(),
         description : 'Decently portable C11 coroutine library',
         subdirs : meson.project_name(),
-        libraries : libkoishi,
+        libraries : [libkoishi, koishi_external_link_args],
         version : meson.project_version(),
+        extra_cflags : koishi_external_args,
     )
 endif

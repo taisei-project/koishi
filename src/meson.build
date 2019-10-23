@@ -3,7 +3,13 @@ koishi_src = files(
     'stack_alloc.c',
 )
 
-backends = ['fcontext', 'win32fiber', 'emscripten', 'ucontext']
+backends = [
+    'fcontext',
+    'win32fiber',
+    'asyncify',
+    'emscripten',
+    'ucontext',
+]
 
 foreach i : backends
     subdir(i)
@@ -28,6 +34,8 @@ endif
 
 koishi_src += get_variable('@0@_src'.format(impl))
 koishi_args += get_variable('@0@_args'.format(impl))
+koishi_external_args += get_variable('@0@_external_args'.format(impl))
+koishi_external_link_args += get_variable('@0@_external_link_args'.format(impl))
 
 message('Using the @0@ backend'.format(impl))
 
