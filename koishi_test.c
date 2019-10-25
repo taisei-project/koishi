@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <assert.h>
+#include <string.h>
 
 void *cofunc1(void *data) {
 	assert(koishi_state(koishi_active()) == KOISHI_RUNNING);
@@ -61,6 +62,7 @@ void test1(koishi_coroutine_t *c) {
 	printf("O: resume 1\n");
 	str = koishi_resume(c, "Hello");
 	printf("O: post yield 1 (got %s)\n", str);
+	assert(!strcmp(str, "Reimu"));
 }
 
 void test2(koishi_coroutine_t *c) {
@@ -91,9 +93,11 @@ int main(int argc, char **argv) {
 	printf("O: resume 2\n");
 	str = koishi_resume(c, "Hakurei");
 	printf("O: post yield 2 (got %s)\n", str);
+	assert(!strcmp(str, "Marisa"));
 	printf("O: resume 3\n");
 	str = koishi_resume(c, "Kirisame");
 	printf("O: post yield 3 (got %s)\n", str);
+	assert(!strcmp(str, "Youmu"));
 	printf("O: resume 4\n");
 	str = koishi_resume(c, "Konpaku");
 	printf("O: done (got %s)\n", str);
