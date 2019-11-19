@@ -3,113 +3,70 @@
 #include <emscripten.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <stdint.h>
 
-struct koishi_coroutine {
-	koishi_coroutine_t *caller;
-	koishi_entrypoint_t entry;
-	emscripten_coroutine emco;
-	void *userdata;
-	size_t stack_size;
-	int state;
-};
+#include "../stack_alloc.h"
 
-static_assert(sizeof(struct koishi_coroutine) <= sizeof(struct koishi_coroutine_pub), "struct koishi_coroutine is too large");
+typedef struct koishi_em_fiber {
+	emscripten_fiber_t *em_fiber;
+	size_t slab_size;
+} koishi_fiber_t;
 
-static KOISHI_THREAD_LOCAL koishi_coroutine_t co_main;
-static KOISHI_THREAD_LOCAL koishi_coroutine_t *co_current;
+#include "../fiber.h"
 
-void co_entry(void *data) {
-	koishi_coroutine_t *co = data;
-	co->userdata = co->entry(co->userdata);
-	co->caller->state = KOISHI_RUNNING;
-	co->state = KOISHI_DEAD;
-	co_current = co->caller;
-	co->emco = NULL;  // emscripten should clean it up automatically
+static KOISHI_THREAD_LOCAL emscripten_fiber_t em_fiber_main;
+
+KOISHI_NORETURN static void co_entry(void *fiber) {
+	koishi_entry(KOISHI_FIBER_TO_COROUTINE(fiber));
 }
 
-KOISHI_API void koishi_init(koishi_coroutine_t *co, size_t min_stack_size, koishi_entrypoint_t entry_point) {
-	co->state = KOISHI_SUSPENDED;
-	co->entry = entry_point;
-	co->stack_size = koishi_util_real_stack_size(min_stack_size);
-	co->emco = emscripten_coroutine_create(co_entry, co, co->stack_size);
+static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size) {
+	// embed the emscripten fiber control structure into the stack allocation
+	size_t control_size = (sizeof(*fiber->em_fiber) + 15) & ~15ull;
+	char *slab = alloc_stack(min_stack_size + control_size, &fiber->slab_size);
+	char *stack = slab + control_size;
+	size_t stack_size = fiber->slab_size - control_size;
+
+	assert(((uintptr_t)stack & 15) == 0);
+
+	emscripten_fiber_t *f = (emscripten_fiber_t*)slab;
+	f->asyncify_fiber.stack_base = stack + stack_size;
+	f->asyncify_fiber.stack_limit = stack;
+	f->asyncify_fiber.stack_ptr = stack + stack_size;
+	f->asyncify_fiber.entry = co_entry;
+	f->asyncify_fiber.user_data = fiber;
+	f->asyncify_data.stack_ptr = f->asyncify_stack;
+	f->asyncify_data.stack_limit = slab + control_size;
+	fiber->em_fiber = f;
 }
 
-KOISHI_API void koishi_recycle(koishi_coroutine_t *co, koishi_entrypoint_t entry_point) {
-	koishi_deinit(co);
-	koishi_init(co, co->stack_size, entry_point);
-}
-
-KOISHI_API void *koishi_resume(koishi_coroutine_t *co, void *arg) {
-	assert(co->state == KOISHI_SUSPENDED);
-	co->userdata = arg;
-	co->state = KOISHI_RUNNING;
-	koishi_coroutine_t *prev = koishi_active();
-	co->caller = prev;
-	prev->state = KOISHI_SUSPENDED;
-	co_current = co;
-	emscripten_coroutine_next(co->emco);
-	assert(co_current == prev);
-	assert(co->caller == prev);
-	assert(co->state == KOISHI_SUSPENDED || co->state == KOISHI_DEAD);
-	assert(co->caller->state == KOISHI_RUNNING);
-	return co->userdata;
-}
-
-KOISHI_API void *koishi_yield(void *arg) {
-	koishi_coroutine_t *co = koishi_active();
-	assert(co->state == KOISHI_RUNNING);
-	co->userdata = arg;
-	co->caller->state = KOISHI_RUNNING;
-	co->state = KOISHI_SUSPENDED;
-	co_current = co->caller;
-	emscripten_yield();
-	co_current = co;
-	co->state = KOISHI_RUNNING;
-	co->caller->state = KOISHI_SUSPENDED;
-	return co->userdata;
-}
-
-KOISHI_API KOISHI_NORETURN void koishi_die(void *arg) {
-	koishi_coroutine_t *co = koishi_active();
-	assert(co->state == KOISHI_RUNNING);
-	co->userdata = arg;
-	co->caller->state = KOISHI_RUNNING;
-	co->state = KOISHI_DEAD;
-	co_current = co->caller;
-	emscripten_yield();
-	KOISHI_UNREACHABLE;
-}
-
-KOISHI_API void koishi_kill(koishi_coroutine_t *co) {
-	if(co == koishi_active()) {
-		koishi_die(NULL);
-	} else {
-		assert(co->state == KOISHI_SUSPENDED);
-		co->state = KOISHI_DEAD;
+static void koishi_fiber_deinit(koishi_fiber_t *fiber) {
+	if(fiber->slab_size) {
+		free_stack(fiber->em_fiber, fiber->slab_size);
+		fiber->em_fiber = NULL;
+		fiber->slab_size = 0;
 	}
 }
 
-KOISHI_API void koishi_deinit(koishi_coroutine_t *co) {
-	if(co->emco) {
-		free(co->emco);
-		co->emco = NULL;
-	}
+static void koishi_fiber_init_main(koishi_fiber_t *fiber) {
+	fiber->em_fiber = &em_fiber_main;
+	emscripten_fiber_init_from_current_context(&em_fiber_main, sizeof(em_fiber_main));
 }
 
-KOISHI_API int koishi_state(koishi_coroutine_t *co) {
-	return co->state;
+static void koishi_fiber_recycle(koishi_fiber_t *fiber) {
+	emscripten_fiber_t *f = fiber->em_fiber;
+	f->asyncify_fiber.stack_ptr = f->asyncify_fiber.stack_base;
+	f->asyncify_fiber.entry = co_entry;
+	f->asyncify_fiber.user_data = fiber;
+	f->asyncify_data.stack_ptr = f->asyncify_stack;
 }
 
-KOISHI_API koishi_coroutine_t *koishi_active(void) {
-	if(!co_current) {
-		co_main.state = KOISHI_RUNNING;
-		co_current = &co_main;
-	}
-
-	return co_current;
+static void koishi_fiber_swap(koishi_fiber_t *from, koishi_fiber_t *to) {
+	emscripten_fiber_swap(from->em_fiber, to->em_fiber);
 }
 
 KOISHI_API void *koishi_get_stack(koishi_coroutine_t *co, size_t *stack_size) {
-	if(stack_size) *stack_size = NULL;
-	return NULL;
+	emscripten_fiber_t *f = co->fiber.em_fiber;
+	if(stack_size) *stack_size = (ptrdiff_t)(f->asyncify_fiber.stack_base - f->asyncify_fiber.stack_limit);
+	return f->asyncify_fiber.stack_limit;
 }
