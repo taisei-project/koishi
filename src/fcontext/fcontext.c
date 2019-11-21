@@ -28,12 +28,13 @@ fcontext_t FCONTEXT_CALL make_fcontext(void *sp, size_t size, void (*fn)(transfe
 transfer_t FCONTEXT_CALL ontop_fcontext(const fcontext_t to, void *vp, transfer_t (*fn)(transfer_t));
 
 static void koishi_fiber_swap(koishi_fiber_t *from, koishi_fiber_t *to) {
-	(void)from;
-	to->fctx = jump_fcontext(to->fctx, to).fctx;
+	transfer_t tf = jump_fcontext(to->fctx, from);
+	from = tf.data;
+	from->fctx = tf.fctx;
 }
 
 KOISHI_NORETURN static void co_entry(transfer_t tf) {
-	koishi_coroutine_t *co = KOISHI_FIBER_TO_COROUTINE(tf.data);
+	koishi_coroutine_t *co = co_current;
 	co->caller->fiber.fctx = tf.fctx;
 	co->userdata = co->fiber.entry(co->userdata);
 	koishi_swap_coroutine(co, co->caller, KOISHI_DEAD);
