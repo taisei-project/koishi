@@ -218,11 +218,18 @@ KOISHI_API KOISHI_NORETURN void koishi_die(void *arg);
  *
  * Puts @p co into the #KOISHI_DEAD state, indicating that it must not be resumed
  * again. If @p co is the currently running coroutine, then this is equivalent
- * to calling #koishi_die with NULL as the argument.
+ * to calling #koishi_die with @p arg as the argument.
+ *
+ * If a coroutine would yield back to another coroutine that has been stopped by
+ * this function, it will instead yield to the stopped coroutine's caller, as if
+ * the stopped coroutine called #koishi_yield(@p arg). This applies both to
+ * explicit and implicit yields (e.g. by return from the entry point),
+ * recursively.
  *
  * @param co The coroutine to stop.
+ * @param arg Value to return from the corresponding #koishi_resume call.
  */
-KOISHI_API void koishi_kill(koishi_coroutine_t *co);
+KOISHI_API void koishi_kill(koishi_coroutine_t *co, void *arg);
 
 /**
  * @brief Query the state of a coroutine.

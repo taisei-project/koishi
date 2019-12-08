@@ -51,6 +51,14 @@ static void koishi_swap_coroutine(koishi_coroutine_t *from, koishi_coroutine_t *
 	assert(from->state == KOISHI_RUNNING);
 #endif
 }
+#include <stdio.h>
+static void koishi_return_to_caller(koishi_coroutine_t *from, int state) {
+	while(from->caller->state == KOISHI_DEAD) {
+		from->caller = from->caller->caller;
+	}
+
+	koishi_swap_coroutine(from, from->caller, state);
+}
 
 KOISHI_API void koishi_init(koishi_coroutine_t *co, size_t min_stack_size, koishi_entrypoint_t entry_point) {
 	co->state = KOISHI_SUSPENDED;
@@ -73,23 +81,24 @@ KOISHI_API void *koishi_resume(koishi_coroutine_t *co, void *arg) {
 KOISHI_API void *koishi_yield(void *arg) {
 	koishi_coroutine_t *co = koishi_active();
 	co->userdata = arg;
-	koishi_swap_coroutine(co, co->caller, KOISHI_SUSPENDED);
+	koishi_return_to_caller(co, KOISHI_SUSPENDED);
 	return co->userdata;
 }
 
 KOISHI_API KOISHI_NORETURN void koishi_die(void *arg) {
 	koishi_coroutine_t *co = koishi_active();
 	co->userdata = arg;
-	koishi_swap_coroutine(co, co->caller, KOISHI_DEAD);
+	koishi_return_to_caller(co, KOISHI_DEAD);
 	KOISHI_UNREACHABLE;
 }
 
-KOISHI_API void koishi_kill(koishi_coroutine_t *co) {
+KOISHI_API void koishi_kill(koishi_coroutine_t *co, void *arg) {
 	if(co == koishi_active()) {
-		koishi_die(NULL);
+		koishi_die(arg);
 	} else {
 		assert(co->state == KOISHI_SUSPENDED);
 		co->state = KOISHI_DEAD;
+		co->userdata = arg;
 	}
 }
 

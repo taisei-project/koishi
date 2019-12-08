@@ -17,7 +17,7 @@ static KOISHI_THREAD_LOCAL ucontext_t co_main_uctx;
 KOISHI_NORETURN static void co_entry(void) {
 	koishi_coroutine_t *co = co_current;
 	co->userdata = co->fiber.entry(co->userdata);
-	koishi_swap_coroutine(co, co->caller, KOISHI_DEAD);
+	koishi_return_to_caller(co, KOISHI_DEAD);
 	KOISHI_UNREACHABLE;
 }
 

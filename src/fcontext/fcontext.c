@@ -37,7 +37,7 @@ KOISHI_NORETURN static void co_entry(transfer_t tf) {
 	koishi_coroutine_t *co = co_current;
 	co->caller->fiber.fctx = tf.fctx;
 	co->userdata = co->fiber.entry(co->userdata);
-	koishi_swap_coroutine(co, co->caller, KOISHI_DEAD);
+	koishi_return_to_caller(co, KOISHI_DEAD);
 	KOISHI_UNREACHABLE;
 }
 

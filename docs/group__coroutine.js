@@ -13,7 +13,7 @@ var group__coroutine =
     [ "koishi_deinit", "group__coroutine.html#ga5c31eddd749e903d15c88c89f176b4b9", null ],
     [ "koishi_die", "group__coroutine.html#ga41f0ca7dfb2a571e5950acd7ae56ea2b", null ],
     [ "koishi_init", "group__coroutine.html#ga5edb12b7059120bd60dc8caabfb57704", null ],
-    [ "koishi_kill", "group__coroutine.html#gac0187a5776ae52f254af9b55943b8e59", null ],
+    [ "koishi_kill", "group__coroutine.html#ga1c2906120c2756db537b118f1e47520f", null ],
     [ "koishi_recycle", "group__coroutine.html#ga712ad3739f7b89cfe0fac54b4fbd10ea", null ],
     [ "koishi_resume", "group__coroutine.html#gaf9791f780463a43dc3e29a52dc8cc9ae", null ],
     [ "koishi_state", "group__coroutine.html#gad5acf510811169d82aa7d204dcd274f1", null ],

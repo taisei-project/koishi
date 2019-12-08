@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <string.h>
+#include <stdlib.h>
 
 void *cofunc1(void *data) {
 	assert(koishi_state(koishi_active()) == KOISHI_RUNNING);
@@ -79,6 +80,26 @@ void test2(koishi_coroutine_t *c) {
 	assert(koishi_state(c) == KOISHI_SUSPENDED);
 }
 
+void *cancelled_caller_test_inner(void *data) {
+	koishi_coroutine_t *outer = data;
+	koishi_kill(outer, (void*)42);
+	koishi_yield(NULL);
+	return NULL;
+}
+
+void *cancelled_caller_test_outer(void *data) {
+	koishi_coroutine_t *inner = data;
+	koishi_resume(inner, koishi_active());
+	abort();  // unreachable
+}
+
+void cancelled_caller_test(int *result) {
+	koishi_coroutine_t inner, outer;
+	koishi_init(&inner, 0, cancelled_caller_test_inner);
+	koishi_init(&outer, 0, cancelled_caller_test_outer);
+	*result = (int)koishi_resume(&outer, &inner);
+}
+
 int main(int argc, char **argv) {
 	if(argc != 1) {
 		printf("%s takes no arguments.\n", argv[0]);
@@ -107,5 +128,10 @@ int main(int argc, char **argv) {
 	test2(&co);
 	koishi_deinit(c);
 
+	int result = 0;
+	cancelled_caller_test(&result);
+	assert(result == 42);
+
+	printf("Done\n");
 	return 0;
 }

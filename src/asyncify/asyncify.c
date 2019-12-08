@@ -23,7 +23,7 @@ void _koishi_impl_fiber_swap(fiber_handle_t old, fiber_handle_t new);
 KOISHI_NORETURN static void co_entry(void) {
 	koishi_coroutine_t *co = co_current;
 	co->userdata = co->fiber.entry(co->userdata);
-	koishi_swap_coroutine(co, co->caller, KOISHI_DEAD);
+	koishi_return_to_caller(co, KOISHI_DEAD);
 	KOISHI_UNREACHABLE;
 }
 
