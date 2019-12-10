@@ -9,7 +9,6 @@ typedef struct fcontext *fcontext_t;
 
 typedef struct fcontext_fiber {
 	fcontext_t fctx;
-	koishi_entrypoint_t entry;
 	char *stack;
 	size_t stack_size;
 } koishi_fiber_t;
@@ -35,29 +34,27 @@ static void koishi_fiber_swap(koishi_fiber_t *from, koishi_fiber_t *to) {
 
 KOISHI_NORETURN static void co_entry(transfer_t tf) {
 	koishi_coroutine_t *co = co_current;
-	co->caller->fiber.fctx = tf.fctx;
-	co->userdata = co->fiber.entry(co->userdata);
-	koishi_return_to_caller(co, KOISHI_DEAD);
-	KOISHI_UNREACHABLE;
+	assert(tf.data == &co->caller->fiber);
+	((koishi_fiber_t*)tf.data)->fctx = tf.fctx;
+	koishi_entry(co);
 }
 
-static inline void init_fiber_fcontext(koishi_fiber_t *fiber, koishi_entrypoint_t entry_point) {
+static inline void init_fiber_fcontext(koishi_fiber_t *fiber) {
 	#if defined KOISHI_ASAN
 	// ASan may get confused if the same memory region was previously used for a stack, event if it gets unmapped/free'd.
 	ASAN_UNPOISON_MEMORY_REGION(fiber->stack, fiber->stack_size);
 	#endif
 
 	fiber->fctx = make_fcontext(fiber->stack + fiber->stack_size, fiber->stack_size, co_entry);
-	fiber->entry = entry_point;
 }
 
-static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size, koishi_entrypoint_t entry_point) {
+static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size) {
 	fiber->stack = alloc_stack(min_stack_size, &fiber->stack_size);
-	init_fiber_fcontext(fiber, entry_point);
+	init_fiber_fcontext(fiber);
 }
 
-static void koishi_fiber_recycle(koishi_fiber_t *fiber, koishi_entrypoint_t entry_point) {
-	init_fiber_fcontext(fiber, entry_point);
+static void koishi_fiber_recycle(koishi_fiber_t *fiber) {
+	init_fiber_fcontext(fiber);
 }
 
 static void koishi_fiber_init_main(koishi_fiber_t *fiber) {

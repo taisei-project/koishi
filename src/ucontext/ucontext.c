@@ -15,23 +15,18 @@ typedef struct uctx_fiber {
 static KOISHI_THREAD_LOCAL ucontext_t co_main_uctx;
 
 KOISHI_NORETURN static void co_entry(void) {
-	koishi_coroutine_t *co = co_current;
-	co->userdata = co->fiber.entry(co->userdata);
-	koishi_return_to_caller(co, KOISHI_DEAD);
-	KOISHI_UNREACHABLE;
+	koishi_entry(co_current);
 }
 
-static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size, koishi_entrypoint_t entry_point) {
+static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size) {
 	ucontext_t *uctx = calloc(1, sizeof(*uctx));
 	getcontext(uctx);
 	uctx->uc_stack.ss_sp = alloc_stack(min_stack_size, &uctx->uc_stack.ss_size);
 	makecontext(uctx, co_entry, 0);
 	fiber->uctx = uctx;
-	fiber->entry = entry_point;
 }
 
-static void koishi_fiber_recycle(koishi_fiber_t *fiber, koishi_entrypoint_t entry_point) {
-	fiber->entry = entry_point;
+static void koishi_fiber_recycle(koishi_fiber_t *fiber) {
 	makecontext(fiber->uctx, co_entry, 0);
 }
 

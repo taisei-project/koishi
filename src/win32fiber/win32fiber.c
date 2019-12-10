@@ -7,28 +7,22 @@
 
 typedef struct win32_fiber {
 	void *ctx;
-	koishi_entrypoint_t entry;
 	size_t stack_size;
 } koishi_fiber_t;
 
 #include "../fiber.h"
 
 KOISHI_NORETURN static void __stdcall fiber_entry(void *data) {
-	koishi_coroutine_t *co = KOISHI_FIBER_TO_COROUTINE(data);
-	co->userdata = co->fiber.entry(co->userdata);
-	koishi_swap_coroutine(co, co->caller, KOISHI_DEAD);
-	KOISHI_UNREACHABLE;
+	koishi_entry(KOISHI_FIBER_TO_COROUTINE(data));
 }
 
-static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size, koishi_entrypoint_t entry_point) {
-	fiber->entry = entry_point;
+static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size) {
 	fiber->stack_size = koishi_util_real_stack_size(min_stack_size);
 	fiber->ctx = CreateFiber(fiber->stack_size, fiber_entry, fiber);
 }
 
-static void koishi_fiber_recycle(koishi_fiber_t *fiber, koishi_entrypoint_t entry_point) {
+static void koishi_fiber_recycle(koishi_fiber_t *fiber) {
 	DeleteFiber(fiber->ctx);
-	fiber->entry = entry_point;
 	fiber->ctx = CreateFiber(fiber->stack_size, fiber_entry, fiber);
 }
 

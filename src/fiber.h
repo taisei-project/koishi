@@ -16,6 +16,7 @@ struct koishi_coroutine {
 	koishi_fiber_t fiber;
 	koishi_coroutine_t *caller;
 	void *userdata;
+	koishi_entrypoint_t entry;
 	int state;
 };
 
@@ -24,9 +25,9 @@ static_assert(sizeof(struct koishi_coroutine) <= sizeof(struct koishi_coroutine_
 #define KOISHI_FIBER_TO_COROUTINE(fib) (koishi_coroutine_t*)(((char*)(fib)) - offsetof(koishi_coroutine_t, fiber))
 
 static void koishi_fiber_deinit(koishi_fiber_t *fiber);
-static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size, koishi_entrypoint_t entry_point);
+static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size);
 static void koishi_fiber_init_main(koishi_fiber_t *fiber);
-static void koishi_fiber_recycle(koishi_fiber_t *fiber, koishi_entrypoint_t entry_point);
+static void koishi_fiber_recycle(koishi_fiber_t *fiber);
 static void koishi_fiber_swap(koishi_fiber_t *from, koishi_fiber_t *to);
 
 static KOISHI_THREAD_LOCAL koishi_coroutine_t co_main;
@@ -60,14 +61,22 @@ static void koishi_return_to_caller(koishi_coroutine_t *from, int state) {
 	koishi_swap_coroutine(from, from->caller, state);
 }
 
+KOISHI_NORETURN static inline void koishi_entry(koishi_coroutine_t *co) {
+	co->userdata = co->entry(co->userdata);
+	koishi_return_to_caller(co, KOISHI_DEAD);
+	KOISHI_UNREACHABLE;
+}
+
 KOISHI_API void koishi_init(koishi_coroutine_t *co, size_t min_stack_size, koishi_entrypoint_t entry_point) {
 	co->state = KOISHI_SUSPENDED;
-	koishi_fiber_init(&co->fiber, min_stack_size, entry_point);
+	co->entry = entry_point;
+	koishi_fiber_init(&co->fiber, min_stack_size);
 }
 
 KOISHI_API void koishi_recycle(koishi_coroutine_t *co, koishi_entrypoint_t entry_point) {
 	co->state = KOISHI_SUSPENDED;
-	koishi_fiber_recycle(&co->fiber, entry_point);
+	co->entry = entry_point;
+	koishi_fiber_recycle(&co->fiber);
 }
 
 KOISHI_API void *koishi_resume(koishi_coroutine_t *co, void *arg) {
