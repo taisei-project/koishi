@@ -51,7 +51,7 @@ static void koishi_swap_coroutine(koishi_coroutine_t *from, koishi_coroutine_t *
 	assert(from->state == KOISHI_RUNNING);
 #endif
 }
-#include <stdio.h>
+
 static void koishi_return_to_caller(koishi_coroutine_t *from, int state) {
 	while(from->caller->state == KOISHI_DEAD) {
 		from->caller = from->caller->caller;
