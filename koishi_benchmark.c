@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <assert.h>
 
-#define ITER 500000000
+#define ITER 5000000
 
 static volatile int counter;
 

@@ -37,7 +37,7 @@ static void koishi_fiber_deinit(koishi_fiber_t *fiber) {
 }
 
 static void koishi_fiber_init_main(koishi_fiber_t *fiber) {
-	fiber->em_fiber = emscripten_fiber_create_from_current_context();
+	fiber->em_fiber = emscripten_fiber_get_current();
 }
 
 static void koishi_fiber_recycle(koishi_fiber_t *fiber, koishi_entrypoint_t entry_point) {
@@ -46,5 +46,5 @@ static void koishi_fiber_recycle(koishi_fiber_t *fiber, koishi_entrypoint_t entr
 }
 
 static void koishi_fiber_swap(koishi_fiber_t *from, koishi_fiber_t *to) {
-	emscripten_fiber_swap(from->em_fiber, to->em_fiber);
+	emscripten_fiber_swap(to->em_fiber);
 }
