@@ -27,6 +27,7 @@ warn_args = cc.get_supported_arguments(
 
 feature_args = [
     '-D_BSD_SOURCE',
+    '-D_DARWIN_C_SOURCE',
     '-D_DEFAULT_SOURCE',
     '-D_GNU_SOURCE',
     '-D_POSIX_C_SOURCE=200809L',
