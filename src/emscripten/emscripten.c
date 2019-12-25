@@ -1,6 +1,6 @@
 
 #include <koishi.h>
-#include <emscripten.h>
+#include <emscripten/fiber.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <stdint.h>

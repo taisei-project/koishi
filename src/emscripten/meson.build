@@ -3,7 +3,7 @@ emscripten_supported = true
 
 emscripten_asyncify_args = ['-s', 'ASYNCIFY']
 
-if cc.sizeof('emscripten_fiber_t', prefix : '#include <emscripten.h>') < 0
+if cc.sizeof('emscripten_fiber_t', prefix : '#include <emscripten/fiber.h>') < 0
     emscripten_supported = false
 else
     foreach fun : [
