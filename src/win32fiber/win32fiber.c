@@ -48,3 +48,9 @@ static void koishi_fiber_deinit(koishi_fiber_t *fiber) {
 static void koishi_fiber_swap(koishi_fiber_t *from, koishi_fiber_t *to) {
 	SwitchToFiber(to->ctx);
 }
+
+KOISHI_API void *koishi_get_stack(koishi_coroutine_t *co, size_t *stack_size) {
+	// TODO: figure out a way to implement this
+	if(stack_size) *stack_size = NULL;
+	return NULL;
+}

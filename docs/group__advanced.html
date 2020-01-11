@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.16"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>libkoishi: Globals</title>
+<title>libkoishi: Advanced, low-level, and/or backend-specific APIs.</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -77,7 +77,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
-$(document).ready(function(){initNavTree('globals_defs.html','');});
+$(document).ready(function(){initNavTree('group__advanced.html','');});
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -95,15 +95,61 @@ $(document).ready(function(){initNavTree('globals_defs.html','');});
 </iframe>
 </div>
 
+<div class="header">
+  <div class="summary">
+<a href="#func-members">Functions</a>  </div>
+  <div class="headertitle">
+<div class="title">Advanced, low-level, and/or backend-specific APIs.</div>  </div>
+</div><!--header-->
 <div class="contents">
-&#160;<ul>
-<li>KOISHI_API
-: <a class="el" href="koishi_8h.html#a7f88f857cd21250db8e0821d1f43c8b4">koishi.h</a>
-</li>
-<li>KOISHI_NORETURN
-: <a class="el" href="koishi_8h.html#a48f9e69334b4c2dfae60a13f113435a9">koishi.h</a>
-</li>
-</ul>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ga6ea4908180cfef5ac294eac30ee2df8a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="koishi_8h.html#a7f88f857cd21250db8e0821d1f43c8b4">KOISHI_API</a> void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__advanced.html#ga6ea4908180cfef5ac294eac30ee2df8a">koishi_get_stack</a> (<a class="el" href="group__coroutine.html#structkoishi__coroutine__t">koishi_coroutine_t</a> *co, size_t *stack_size)</td></tr>
+<tr class="memdesc:ga6ea4908180cfef5ac294eac30ee2df8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query the coroutine's stack region.  <a href="group__advanced.html#ga6ea4908180cfef5ac294eac30ee2df8a">More...</a><br /></td></tr>
+<tr class="separator:ga6ea4908180cfef5ac294eac30ee2df8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<h2 class="groupheader">Function Documentation</h2>
+<a id="ga6ea4908180cfef5ac294eac30ee2df8a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6ea4908180cfef5ac294eac30ee2df8a">&#9670;&nbsp;</a></span>koishi_get_stack()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="koishi_8h.html#a7f88f857cd21250db8e0821d1f43c8b4">KOISHI_API</a> void* koishi_get_stack </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__coroutine.html#structkoishi__coroutine__t">koishi_coroutine_t</a> *&#160;</td>
+          <td class="paramname"><em>co</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramname"><em>stack_size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Query the coroutine's stack region. </p>
+<dl class="section warning"><dt>Warning</dt><dd>This function may not be supported by some backends. Some backends may also embed their control structures into the stack at context creation time, which are not safe to overwrite. Do not use this function unless you fully understand what you're doing.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A pointer to the beginning of the stack memory region. This is always the lower end, regardless of stack growth direction. Returns NULL if not supported by the backend. Note that some backends may only support querying user-created coroutines, but not the thread's main context.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">co</td><td>The coroutine to query. </td></tr>
+    <tr><td class="paramname">stack_size</td><td>If not NULL, the stack size is written to memory at this location. NULL is written if not supported by the backend. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

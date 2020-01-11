@@ -108,3 +108,8 @@ KOISHI_API koishi_coroutine_t *koishi_active(void) {
 
 	return co_current;
 }
+
+KOISHI_API void *koishi_get_stack(koishi_coroutine_t *co, size_t *stack_size) {
+	if(stack_size) *stack_size = NULL;
+	return NULL;
+}

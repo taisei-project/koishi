@@ -253,6 +253,31 @@ KOISHI_API koishi_coroutine_t *koishi_active(void);
 
 /**
  * @}
+ * @defgroup advanced Advanced, low-level, and/or backend-specific APIs.
+ * @{
+ */
+
+/**
+ * @brief Query the coroutine's stack region.
+ *
+ * @warning This function may not be supported by some backends. Some backends
+ * may also embed their control structures into the stack at context creation
+ * time, which are not safe to overwrite. Do not use this function unless you
+ * fully understand what you're doing.
+ *
+ * @return A pointer to the beginning of the stack memory region. This is always
+ * the lower end, regardless of stack growth direction. Returns NULL if not
+ * supported by the backend. Note that some backends may only support querying
+ * user-created coroutines, but not the thread's main context.
+ *
+ * @param co The coroutine to query.
+ * @param stack_size If not NULL, the stack size is written to memory at this
+ * location. NULL is written if not supported by the backend.
+ */
+KOISHI_API void *koishi_get_stack(koishi_coroutine_t *co, size_t *stack_size);
+
+/**
+ * @}
  * @defgroup util Utility functions.
  * @{
  */

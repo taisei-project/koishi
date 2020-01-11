@@ -48,3 +48,8 @@ static void koishi_fiber_recycle(koishi_fiber_t *fiber) {
 static void koishi_fiber_swap(koishi_fiber_t *from, koishi_fiber_t *to) {
 	_koishi_impl_fiber_swap(from->handle, to->handle);
 }
+
+KOISHI_API void *koishi_get_stack(koishi_coroutine_t *co, size_t *stack_size) {
+	if(stack_size) *stack_size = NULL;
+	return NULL;
+}

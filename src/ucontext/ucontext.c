@@ -49,3 +49,8 @@ static void koishi_fiber_deinit(koishi_fiber_t *fiber) {
 		fiber->uctx = NULL;
 	}
 }
+
+KOISHI_API void *koishi_get_stack(koishi_coroutine_t *co, size_t *stack_size) {
+	if(stack_size) *stack_size = co->fiber.uctx->uc_stack.ss_size;
+	return co->fiber.uctx->uc_stack.ss_sp;
+}
