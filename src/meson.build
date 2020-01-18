@@ -7,7 +7,6 @@ backends = [
     'fcontext',
     'win32fiber',
     'emscripten',
-    'asyncify',
     'ucontext_e2k',
     'ucontext',
 ]
