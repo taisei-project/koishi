@@ -6,7 +6,6 @@ koishi_src = files(
 backends = [
     'fcontext',
     'win32fiber',
-    'asyncify',
     'emscripten',
     'ucontext_e2k',
     'ucontext',
