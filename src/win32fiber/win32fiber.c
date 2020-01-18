@@ -12,7 +12,7 @@ typedef struct win32_fiber {
 
 #include "../fiber.h"
 
-KOISHI_NORETURN static void __stdcall fiber_entry(void *data) {
+static KOISHI_NORETURN void __stdcall fiber_entry(void *data) {
 	koishi_entry(KOISHI_FIBER_TO_COROUTINE(data));
 }
 

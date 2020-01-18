@@ -32,7 +32,7 @@ static void koishi_fiber_swap(koishi_fiber_t *from, koishi_fiber_t *to) {
 	from->fctx = tf.fctx;
 }
 
-KOISHI_NORETURN static void co_entry(transfer_t tf) {
+static KOISHI_NORETURN void co_entry(transfer_t tf) {
 	koishi_coroutine_t *co = co_current;
 	assert(tf.data == &co->caller->fiber);
 	((koishi_fiber_t*)tf.data)->fctx = tf.fctx;

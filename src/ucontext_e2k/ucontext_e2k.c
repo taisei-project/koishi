@@ -14,7 +14,7 @@ typedef struct uctx_fiber {
 
 static KOISHI_THREAD_LOCAL ucontext_t co_main_uctx;
 
-KOISHI_NORETURN static void co_entry(void) {
+static KOISHI_NORETURN void co_entry(void) {
 	koishi_entry(co_current);
 }
 

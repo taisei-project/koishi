@@ -61,7 +61,7 @@ static void koishi_return_to_caller(koishi_coroutine_t *from, int state) {
 	koishi_swap_coroutine(from, from->caller, state);
 }
 
-KOISHI_NORETURN static inline void koishi_entry(koishi_coroutine_t *co) {
+static inline KOISHI_NORETURN void koishi_entry(koishi_coroutine_t *co) {
 	co->userdata = co->entry(co->userdata);
 	koishi_return_to_caller(co, KOISHI_DEAD);
 	KOISHI_UNREACHABLE;
