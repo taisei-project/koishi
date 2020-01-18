@@ -1,7 +1,15 @@
 option(
     'impl',
     type : 'combo',
-    choices : ['auto', 'fcontext', 'win32fiber', 'emscripten', 'ucontext', 'asyncify'],
+    choices : [
+        'auto',
+        'fcontext',
+        'win32fiber',
+        'asyncify',
+        'emscripten',
+        'ucontext_e2k',
+        'ucontext',
+    ],
     description : 'Which implementation to use'
 )
 
