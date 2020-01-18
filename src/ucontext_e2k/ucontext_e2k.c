@@ -7,7 +7,6 @@
 
 typedef struct uctx_fiber {
 	ucontext_t *uctx;
-	koishi_entrypoint_t entry;
 } koishi_fiber_t;
 
 #include "../fiber.h"
