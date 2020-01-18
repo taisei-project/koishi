@@ -8,6 +8,7 @@ backends = [
     'win32fiber',
     'asyncify',
     'emscripten',
+    'ucontext_e2k',
     'ucontext',
 ]
 
@@ -17,19 +18,18 @@ endforeach
 
 impl = get_option('impl')
 
-if impl == 'auto'
-    foreach i : backends
-        if get_variable('@0@_supported'.format(i))
-            impl = i
-            break
-        endif
-    endforeach
-
-    if impl == 'auto'
-        error('Unsupported platform')
-    endif
-elif not get_variable('@0@_supported'.format(impl))
+if impl != 'auto' and not get_variable('@0@_supported'.format(impl))
     error('@0@ is not supported on this platform'.format(impl))
+endif
+
+foreach i : backends
+    if impl == 'auto' and get_variable('@0@_supported'.format(i))
+        impl = i
+    endif
+endforeach
+
+if impl == 'auto'
+    error('Unsupported platform')
 endif
 
 koishi_src += get_variable('@0@_src'.format(impl))

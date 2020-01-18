@@ -22,12 +22,15 @@ static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size) {
 	ucontext_t *uctx = calloc(1, sizeof(*uctx));
 	getcontext(uctx);
 	uctx->uc_stack.ss_sp = alloc_stack(min_stack_size, &uctx->uc_stack.ss_size);
-	makecontext(uctx, co_entry, 0);
+	// TODO: makecontext_e2k() could fail, but for now we don't expect that
+	makecontext_e2k(uctx, co_entry, 0);
 	fiber->uctx = uctx;
 }
 
 static void koishi_fiber_recycle(koishi_fiber_t *fiber) {
-	makecontext(fiber->uctx, co_entry, 0);
+	freecontext_e2k(fiber->uctx);
+	// TODO: makecontext_e2k() could fail, but for now we don't expect that
+	makecontext_e2k(fiber->uctx, co_entry, 0);
 }
 
 static void koishi_fiber_swap(koishi_fiber_t *from, koishi_fiber_t *to) {
@@ -45,6 +48,7 @@ static void koishi_fiber_deinit(koishi_fiber_t *fiber) {
 			free_stack(fiber->uctx->uc_stack.ss_sp, fiber->uctx->uc_stack.ss_size);
 		}
 
+		freecontext_e2k(fiber->uctx);
 		free(fiber->uctx);
 		fiber->uctx = NULL;
 	}

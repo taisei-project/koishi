@@ -97,7 +97,7 @@ void cancelled_caller_test(int *result) {
 	koishi_coroutine_t inner, outer;
 	koishi_init(&inner, 0, cancelled_caller_test_inner);
 	koishi_init(&outer, 0, cancelled_caller_test_outer);
-	*result = (int)koishi_resume(&outer, &inner);
+	*result = (intptr_t)koishi_resume(&outer, &inner);
 }
 
 int main(int argc, char **argv) {
