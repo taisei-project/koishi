@@ -12,3 +12,6 @@ indent_style = tab
 indent_style = space
 indent_size = 4
 
+[meson_options.txt]
+indent_style = space
+indent_size = 4
