@@ -95,6 +95,30 @@ if not can_get_page_size
     warning('No way to detect page size at runtime, assuming @0@'.format(static_page_size))
 endif
 
+# Try to pick a sjlj variant that does not care about the signal mask (much faster).
+koishi_sjlj = ''
+foreach tuple : [
+    # POSIX, has explicit "save signal mask" parameter
+    ['SIG', '#include <setjmp.h>\nint main() { sigjmp_buf buf; if(sigsetjmp(buf, 0)) siglongjmp(buf, 1); }', 'sigsetjmp/siglongjmp'],
+
+    # Non-standard (BSD), doesn't save signal mask.
+    ['BSD', '#include <setjmp.h>\nint main() { jmp_buf buf; if(_setjmp(buf)) _longjmp(buf, 1); }', '_setjmp/_longjmp'],
+
+    # Standard C, implementation-defined.
+    ['STD', '#include <setjmp.h>\nint main() { jmp_buf buf; if(setjmp(buf)) longjmp(buf, 1); }', 'setjmp/longjmp'],
+]
+    if (
+        koishi_sjlj == '' and
+        cc.links(tuple[1], name : '@0@ test'.format(tuple[2]), args : feature_args)
+    )
+        koishi_sjlj = tuple[0]
+    endif
+endforeach
+
+if koishi_sjlj != ''
+    koishi_args += ['-DKOISHI_SJLJ_@0@'.format(koishi_sjlj)]
+endif
+
 message('Configuration args: @0@'.format(koishi_args))
 
 koishi_args += ['-DBUILDING_KOISHI']

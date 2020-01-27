@@ -9,13 +9,22 @@ backends = [
     'emscripten',
     'ucontext_e2k',
     'ucontext',
+    'ucontext_sjlj',
 ]
 
 foreach i : backends
+    message('** Checking backend `@0@`'.format(i))
     subdir(i)
+
+    if get_variable('@0@_supported'.format(i))
+        message('** Backend `@0@` is supported'.format(i))
+    else
+        message('** Backend `@0@` is not supported'.format(i))
+    endif
 endforeach
 
 impl = get_option('impl')
+is_auto_pick = (impl == 'auto')
 
 if impl != 'auto' and not get_variable('@0@_supported'.format(impl))
     error('@0@ is not supported on this platform'.format(impl))
@@ -36,7 +45,11 @@ koishi_args += get_variable('@0@_args'.format(impl))
 koishi_external_args += get_variable('@0@_external_args'.format(impl))
 koishi_external_link_args += get_variable('@0@_external_link_args'.format(impl))
 
-message('Using the @0@ backend'.format(impl))
+if is_auto_pick
+    message('Using the @0@ backend (auto)'.format(impl))
+else
+    message('Using the @0@ backend (manual)'.format(impl))
+endif
 
 libkoishi = library('koishi',
     koishi_src,

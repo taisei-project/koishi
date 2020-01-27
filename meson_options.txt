@@ -8,6 +8,7 @@ option(
         'emscripten',
         'ucontext_e2k',
         'ucontext',
+        'ucontext_sjlj',
     ],
     description : 'Which implementation to use'
 )
