@@ -3,7 +3,7 @@ project('koishi', 'c',
     meson_version : '>=0.48.0',
     default_options : [
         'c_std=c11',
-        'default_library=both',
+        'default_library=static',
         'warning_level=3',
     ]
 )
