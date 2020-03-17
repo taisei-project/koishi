@@ -9,6 +9,7 @@
 typedef struct uctx_fiber {
 	ucontext_t uctx;
 	koishi_jmp_buf jmp;
+	KOISHI_VALGRIND_STACK_ID(valgrind_stack_id)
 } uctx_fiber_t;
 
 typedef uctx_fiber_t *koishi_fiber_t;
@@ -40,6 +41,7 @@ static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size) {
 	ucontext_t *uctx = &(*fiber)->uctx;
 	getcontext(uctx);
 	uctx->uc_stack.ss_sp = alloc_stack(min_stack_size, &uctx->uc_stack.ss_size);
+	KOISHI_VALGRIND_STACK_REGISTER((*fiber)->valgrind_stack_id, uctx->uc_stack.ss_sp, (char*)uctx->uc_stack.ss_sp + uctx->uc_stack.ss_size);
 	koishi_fiber_recycle(fiber);
 }
 
@@ -68,6 +70,7 @@ static void koishi_fiber_deinit(koishi_fiber_t *fiber) {
 	if(*fiber) {
 		ucontext_t *uctx = &(*fiber)->uctx;
 		if(uctx->uc_stack.ss_sp) {
+			KOISHI_VALGRIND_STACK_DEREGISTER((*fiber)->valgrind_stack_id);
 			free_stack(uctx->uc_stack.ss_sp, uctx->uc_stack.ss_size);
 		}
 

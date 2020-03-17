@@ -119,6 +119,10 @@ if koishi_sjlj != ''
     koishi_args += ['-DKOISHI_SJLJ_@0@'.format(koishi_sjlj)]
 endif
 
+if get_option('valgrind')
+    koishi_args += ['-DKOISHI_VALGRIND']
+endif
+
 message('Configuration args: @0@'.format(koishi_args))
 
 koishi_args += ['-DBUILDING_KOISHI']

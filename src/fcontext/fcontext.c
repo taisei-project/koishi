@@ -11,6 +11,7 @@ typedef struct fcontext_fiber {
 	fcontext_t fctx;
 	char *stack;
 	size_t stack_size;
+	KOISHI_VALGRIND_STACK_ID(valgrind_stack_id)
 } koishi_fiber_t;
 
 #include "../fiber.h"
@@ -50,6 +51,7 @@ static inline void init_fiber_fcontext(koishi_fiber_t *fiber) {
 
 static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size) {
 	fiber->stack = alloc_stack(min_stack_size, &fiber->stack_size);
+	KOISHI_VALGRIND_STACK_REGISTER(fiber->valgrind_stack_id, fiber->stack, fiber->stack + fiber->stack_size);
 	init_fiber_fcontext(fiber);
 }
 
@@ -63,6 +65,7 @@ static void koishi_fiber_init_main(koishi_fiber_t *fiber) {
 
 static void koishi_fiber_deinit(koishi_fiber_t *fiber) {
 	if(fiber->stack) {
+		KOISHI_VALGRIND_STACK_DEREGISTER(fiber->valgrind_stack_id);
 		free_stack(fiber->stack, fiber->stack_size);
 		fiber->stack = NULL;
 	}

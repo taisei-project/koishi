@@ -52,6 +52,17 @@
 		#define KOISHI_ASAN
 	#endif
 
+	#if defined(KOISHI_VALGRIND)
+		#include <valgrind/valgrind.h>
+		#define KOISHI_VALGRIND_STACK_ID(name) int name;
+		#define KOISHI_VALGRIND_STACK_REGISTER(id, start, end) id = VALGRIND_STACK_REGISTER(start, end)
+		#define KOISHI_VALGRIND_STACK_DEREGISTER(id) VALGRIND_STACK_DEREGISTER(id)
+	#else
+		#define KOISHI_VALGRIND_STACK_ID(name)
+		#define KOISHI_VALGRIND_STACK_REGISTER(id, start, end)
+		#define KOISHI_VALGRIND_STACK_DEREGISTER(id)
+	#endif
+
 	#ifndef offsetof
 		#ifdef __GNUC__
 			#define offsetof(type, field) __builtin_offsetof(type, field)

@@ -19,3 +19,10 @@ option(
     value : true,
     description : 'Whether multiple coroutines can be ran on different threads at once (needs compiler support)'
 )
+
+option(
+    'valgrind',
+    type : 'boolean',
+    value : false,
+    description : 'Enable support for running under Valgrind (for debugging)'
+)
