@@ -41,6 +41,7 @@ void *cofunc2(void *data) {
 	int nested_return = (intptr_t)koishi_resume(c2, koishi_active());
 	assert(koishi_state(koishi_active()) == KOISHI_RUNNING);
 	assert(nested_return == 42);
+	koishi_deinit(c2);
 
 	intptr_t i = 0;
 	printf("C: start coroutine\n");
@@ -98,6 +99,8 @@ void cancelled_caller_test(int *result) {
 	koishi_init(&inner, 0, cancelled_caller_test_inner);
 	koishi_init(&outer, 0, cancelled_caller_test_outer);
 	*result = (intptr_t)koishi_resume(&outer, &inner);
+	koishi_deinit(&inner);
+	koishi_deinit(&outer);
 }
 
 int main(int argc, char **argv) {
