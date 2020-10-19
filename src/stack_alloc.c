@@ -4,44 +4,44 @@
 
 #include <stdlib.h>
 
-#if defined KOISHI_HAVE_MMAP
-	#include <sys/mman.h>
-#endif
-
-#if defined KOISHI_HAVE_SYSCONF || defined KOISHI_HAVE_GETPAGESIZE
-	#include <unistd.h>
-#endif
-
 #if defined KOISHI_HAVE_WIN32API
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
 	#include <memoryapi.h>
 	#include <sysinfoapi.h>
+#else
+	#if defined KOISHI_HAVE_MMAP
+		#include <sys/mman.h>
+	#endif
+
+	#if defined KOISHI_HAVE_SYSCONF || defined KOISHI_HAVE_GETPAGESIZE
+		#include <unistd.h>
+	#endif
 #endif
 
 static inline size_t get_page_size(void) {
 #if defined KOISHI_STATIC_PAGE_SIZE
 	return KOISHI_STATIC_PAGE_SIZE;
+#elif defined KOISHI_HAVE_WIN32API
+	SYSTEM_INFO si;
+	GetSystemInfo(&si);
+	return si.dwPageSize;
 #elif defined KOISHI_HAVE_SYSCONF && defined _SC_PAGESIZE
 	return sysconf(_SC_PAGESIZE);
 #elif defined KOISHI_HAVE_SYSCONF && defined _SC_PAGE_SIZE
 	return sysconf(_SC_PAGE_SIZE);
 #elif defined KOISHI_HAVE_GETPAGESIZE
 	return getpagesize();
-#elif defined KOISHI_HAVE_WIN32API
-	SYSTEM_INFO si;
-	GetSystemInfo(&si);
-	return si.dwPageSize;
 #else
 	#error No way to detect page size
 #endif
 }
 
 static inline void *alloc_stack_mem(size_t size) {
-#if defined KOISHI_HAVE_MMAP
-	return mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | KOISHI_MAP_ANONYMOUS, -1, 0);
-#elif defined KOISHI_HAVE_WIN32API
+#if defined KOISHI_HAVE_WIN32API
 	return VirtualAlloc(NULL, size, MEM_COMMIT, PAGE_READWRITE);
+#elif defined KOISHI_HAVE_MMAP
+	return mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | KOISHI_MAP_ANONYMOUS, -1, 0);
 #elif defined KOISHI_HAVE_ALIGNED_ALLOC
 	return aligned_alloc(koishi_util_page_size(), size);
 #elif defined KOISHI_HAVE_POSIX_MEMALIGN
@@ -55,11 +55,11 @@ static inline void *alloc_stack_mem(size_t size) {
 }
 
 static inline void free_stack_mem(void *stack, size_t size) {
-#if defined KOISHI_HAVE_MMAP
-	munmap(stack, size);
-#elif defined KOISHI_HAVE_WIN32API
+#if defined KOISHI_HAVE_WIN32API
 	(void)size;
 	VirtualFree(stack, 0, MEM_RELEASE);
+#elif defined KOISHI_HAVE_MMAP
+	munmap(stack, size);
 #else
 	(void)size;
 	free(stack);
