@@ -26,10 +26,8 @@ static inline size_t get_page_size(void) {
 	SYSTEM_INFO si;
 	GetSystemInfo(&si);
 	return si.dwPageSize;
-#elif defined KOISHI_HAVE_SYSCONF && defined _SC_PAGESIZE
-	return sysconf(_SC_PAGESIZE);
-#elif defined KOISHI_HAVE_SYSCONF && defined _SC_PAGE_SIZE
-	return sysconf(_SC_PAGE_SIZE);
+#elif defined KOISHI_HAVE_SYSCONF
+	return sysconf(KOISHI_SC_PAGE_SIZE);
 #elif defined KOISHI_HAVE_GETPAGESIZE
 	return getpagesize();
 #else
