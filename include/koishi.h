@@ -90,6 +90,7 @@ enum koishi_state {
 	KOISHI_SUSPENDED,  /**< The coroutine is suspended and may be resumed with #koishi_resume. */
 	KOISHI_RUNNING,    /**< The coroutine is currently executing and may be yielded from with #koishi_yield. Only up to one coroutine may be running per thread at all times. */
 	KOISHI_DEAD,       /**< The coroutine has finished executing and may be recycled with #koishi_recycle or destroyed with #koishi_deinit. */
+	KOISHI_IDLE,       /**< The coroutine has resumed another coroutine and is waiting for it to yield. */
 };
 
 /**
@@ -181,7 +182,7 @@ KOISHI_API void koishi_deinit(koishi_coroutine_t *co);
  * @brief Resume a suspended coroutine.
  *
  * Transfers control flow to the coroutine context, putting it into the
- * #KOISHI_RUNNING state. The calling context is put into the #KOISHI_SUSPENDED
+ * #KOISHI_RUNNING state. The calling context is put into the #KOISHI_IDLE
  * state.
  *
  * If the coroutine is resumed for the first time, \p arg will be passed
@@ -231,10 +232,9 @@ KOISHI_API KOISHI_NORETURN void koishi_die(void *arg);
  * again. If @p co is the currently running coroutine, then this is equivalent
  * to calling #koishi_die with @p arg as the argument.
  *
- * If a coroutine would yield back to another coroutine that has been stopped by
- * this function, it will instead yield to the stopped coroutine's caller, as if
- * the stopped coroutine called #koishi_yield(@p arg). This applies both to
- * explicit and implicit yields (e.g. by return from the entry point),
+ * If @p co is in the #KOISHI_IDLE state, the coroutine it's waiting on would yield
+ * to the caller of @p co, as if @p co called #koishi_yield(@p arg). This applies
+ * to both explicit and implicit yields (e.g. by return from the entry point),
  * recursively.
  *
  * @param co The coroutine to stop.
@@ -245,9 +245,10 @@ KOISHI_API void koishi_kill(koishi_coroutine_t *co, void *arg);
 /**
  * @brief Query the state of a coroutine.
  *
- * @return One of the tree possible states.
+ * @return One of the four possible states.
  * 		- #KOISHI_SUSPENDED
  * 		- #KOISHI_RUNNING
+ * 		- #KOISHI_IDLE
  * 		- #KOISHI_DEAD
  */
 KOISHI_API int koishi_state(koishi_coroutine_t *co);
@@ -257,8 +258,9 @@ KOISHI_API int koishi_state(koishi_coroutine_t *co);
  *
  * @return The coroutine currently running on this thread. This function may be
  * called from the thread's main context as well, in which case it returns a
- * pseudo-coroutine that represents that context. Attempting to resume or yield
- * from such pseudo-coroutines leads to undefined behavior.
+ * pseudo-coroutine that represents that context. Attempting to yield from such
+ * pseudo-coroutines leads to undefined behavior. Pseudo-coroutines are never
+ * in the #KOISHI_SUSPENDED state.
  */
 KOISHI_API koishi_coroutine_t *koishi_active(void);
 

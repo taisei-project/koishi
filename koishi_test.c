@@ -29,7 +29,7 @@ void *cofunc1(void *data) {
 
 void *cofunc_nested(void *data) {
 	koishi_coroutine_t *caller = data;
-	assert(koishi_state(caller) == KOISHI_SUSPENDED);
+	assert(koishi_state(caller) == KOISHI_IDLE);
 	assert(koishi_state(koishi_active()) == KOISHI_RUNNING);
 	return (void*)42;
 }

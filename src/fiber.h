@@ -37,7 +37,6 @@ static void koishi_swap_coroutine(koishi_coroutine_t *from, koishi_coroutine_t *
 #if !defined NDEBUG
 	koishi_coroutine_t *prev = koishi_active();
 	assert(from->state == KOISHI_RUNNING);
-	assert(to->state == KOISHI_SUSPENDED);
 	assert(prev == from);
 #endif
 
@@ -48,16 +47,20 @@ static void koishi_swap_coroutine(koishi_coroutine_t *from, koishi_coroutine_t *
 
 #if !defined NDEBUG
 	assert(co_current == prev);
-	assert(to->state == KOISHI_SUSPENDED || to->state == KOISHI_DEAD);
+	assert(co_current == from);
 	assert(from->state == KOISHI_RUNNING);
+	assert(to->state == KOISHI_SUSPENDED || to->state == KOISHI_IDLE || to->state == KOISHI_DEAD);
 #endif
 }
 
 static void koishi_return_to_caller(koishi_coroutine_t *from, int state) {
+	assert(from->caller != NULL);
+
 	while(from->caller->state == KOISHI_DEAD) {
 		from->caller = from->caller->caller;
 	}
 
+	assert(from->caller->state == KOISHI_IDLE);
 	koishi_swap_coroutine(from, from->caller, state);
 }
 
@@ -80,10 +83,11 @@ KOISHI_API void koishi_recycle(koishi_coroutine_t *co, koishi_entrypoint_t entry
 }
 
 KOISHI_API void *koishi_resume(koishi_coroutine_t *co, void *arg) {
+	assert(co->state == KOISHI_SUSPENDED);
 	koishi_coroutine_t *prev = koishi_active();
 	co->userdata = arg;
 	co->caller = prev;
-	koishi_swap_coroutine(prev, co, KOISHI_SUSPENDED);
+	koishi_swap_coroutine(prev, co, KOISHI_IDLE);
 	return co->userdata;
 }
 
@@ -105,7 +109,7 @@ KOISHI_API void koishi_kill(koishi_coroutine_t *co, void *arg) {
 	if(co == koishi_active()) {
 		koishi_die(arg);
 	} else {
-		assert(co->state == KOISHI_SUSPENDED);
+		assert(co->state == KOISHI_SUSPENDED || co->state == KOISHI_IDLE);
 		co->state = KOISHI_DEAD;
 		co->userdata = arg;
 	}
