@@ -1,12 +1,14 @@
 var koishi_8h =
 [
+    [ "koishi_coroutine_t", "structkoishi__coroutine__t.html", "structkoishi__coroutine__t" ],
     [ "KOISHI_API", "koishi_8h.html#a7f88f857cd21250db8e0821d1f43c8b4", null ],
     [ "KOISHI_NORETURN", "koishi_8h.html#a48f9e69334b4c2dfae60a13f113435a9", null ],
     [ "koishi_entrypoint_t", "group__coroutine.html#gae2b61aed9a9a639c4fbbca24b8baec53", null ],
     [ "koishi_state", "group__coroutine.html#ga5ee080912352fa1fd99d025f278f47d0", [
       [ "KOISHI_SUSPENDED", "group__coroutine.html#gga5ee080912352fa1fd99d025f278f47d0a17381955b0d91fe7ef04322b6f9ee069", null ],
       [ "KOISHI_RUNNING", "group__coroutine.html#gga5ee080912352fa1fd99d025f278f47d0a61d0e51b3dad3cc61336f957d4b79856", null ],
-      [ "KOISHI_DEAD", "group__coroutine.html#gga5ee080912352fa1fd99d025f278f47d0ada9bc1c2cf220958875508098b3ad4bf", null ]
+      [ "KOISHI_DEAD", "group__coroutine.html#gga5ee080912352fa1fd99d025f278f47d0ada9bc1c2cf220958875508098b3ad4bf", null ],
+      [ "KOISHI_IDLE", "group__coroutine.html#gga5ee080912352fa1fd99d025f278f47d0a9c2ef7ebea862464aa1aa06843700041", null ]
     ] ],
     [ "koishi_active", "group__coroutine.html#ga5af04a1f457754a0eed0dbd253ebd3d4", null ],
     [ "koishi_deinit", "group__coroutine.html#ga5c31eddd749e903d15c88c89f176b4b9", null ],
