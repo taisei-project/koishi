@@ -66,7 +66,7 @@ foreach routine : fcontext_asm_routines
     full_path = join_paths(fcontext_asm_srcdir, fname)
     rel_path = join_paths('asm', fname)
 
-    if run_command(checkfile, full_path).returncode() == 0
+    if run_command(checkfile, full_path, check : false).returncode() == 0
         fcontext_src += files(rel_path)
     else
         message('fcontext @0@ routine implementation missing'.format(routine))
