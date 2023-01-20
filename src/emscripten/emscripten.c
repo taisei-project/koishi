@@ -34,13 +34,15 @@ static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size) {
 	size_t stack_size = fiber->data_size - control_size;
 
 	em_fiber_data_t *const d = fiber->data;
-	d->em_fiber.stack_base = d->c_stack + stack_size;
-	d->em_fiber.stack_limit = d->c_stack;
-	d->em_fiber.stack_ptr = d->c_stack + stack_size;
-	d->em_fiber.entry = co_entry;
-	d->em_fiber.user_data = fiber;
-	d->em_fiber.asyncify_data.stack_ptr = d->asyncify_stack;
-	d->em_fiber.asyncify_data.stack_limit = d->c_stack;
+	emscripten_fiber_init(
+		&d->em_fiber,
+		co_entry,
+		fiber,
+		d->c_stack,
+		stack_size,
+		d->asyncify_stack,
+		sizeof(d->asyncify_stack)
+	);
 
 	assert(((uintptr_t)d->em_fiber.stack_limit & 15) == 0);
 }
