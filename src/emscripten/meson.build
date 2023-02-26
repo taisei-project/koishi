@@ -17,6 +17,7 @@ else
 endif
 
 emscripten_src = files('emscripten.c')
+emscripten_deps = []
 emscripten_args = []
 emscripten_external_args = []
 emscripten_external_link_args = emscripten_asyncify_args

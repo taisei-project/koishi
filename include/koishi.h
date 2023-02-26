@@ -70,6 +70,11 @@
 			#define offsetof(type, field) ((size_t)&(((type *)0)->field))
 		#endif
 	#endif
+
+	#ifdef __cplusplus
+		#undef KOISHI_THREAD_LOCAL
+		#define KOISHI_THREAD_LOCAL thread_local
+	#endif
 #endif
 
 #ifdef __cplusplus
@@ -223,7 +228,7 @@ KOISHI_API void *koishi_yield(void *arg);
  *
  * @param arg Value to return from the corresponding #koishi_resume call.
  */
-KOISHI_API KOISHI_NORETURN void koishi_die(void *arg);
+KOISHI_NORETURN KOISHI_API void koishi_die(void *arg);
 
 /**
  * @brief Stop a coroutine.

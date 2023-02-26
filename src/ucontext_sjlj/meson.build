@@ -12,6 +12,7 @@ else
 endif
 
 ucontext_sjlj_src = files('ucontext_sjlj.c')
+ucontext_sjlj_deps = []
 ucontext_sjlj_args = ['-U_FORTIFY_SOURCE']  # avoid longjmp false positives
 ucontext_sjlj_external_args = []
 ucontext_sjlj_external_link_args = []

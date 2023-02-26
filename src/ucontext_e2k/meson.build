@@ -11,6 +11,7 @@ foreach fun : ['getcontext', 'makecontext_e2k', 'swapcontext', 'freecontext_e2k'
 endforeach
 
 ucontext_e2k_src = files('ucontext_e2k.c')
+ucontext_e2k_deps = []
 ucontext_e2k_args = []
 ucontext_e2k_external_args = []
 ucontext_e2k_external_link_args = []

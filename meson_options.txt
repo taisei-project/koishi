@@ -4,6 +4,7 @@ option(
     choices : [
         'auto',
         'fcontext',
+        'boost_fcontext',
         'win32fiber',
         'emscripten',
         'ucontext_e2k',

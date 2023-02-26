@@ -74,6 +74,7 @@ foreach routine : fcontext_asm_routines
     endif
 endforeach
 
+fcontext_deps = []
 fcontext_args = ['-DFCONTEXT_CALL=@0@'.format(fcontext_callconv)]
 fcontext_external_args = []
 fcontext_external_link_args = []

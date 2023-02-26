@@ -3,8 +3,11 @@ koishi_src = files(
     'stack_alloc.c',
 )
 
+koishi_deps = []
+
 backends = [
     'fcontext',
+    'boost_fcontext',
     'win32fiber',
     'emscripten',
     'ucontext_e2k',
@@ -41,6 +44,7 @@ if impl == 'auto'
 endif
 
 koishi_src += get_variable('@0@_src'.format(impl))
+koishi_deps += get_variable('@0@_deps'.format(impl))
 koishi_args += get_variable('@0@_args'.format(impl))
 koishi_external_args += get_variable('@0@_external_args'.format(impl))
 koishi_external_link_args += get_variable('@0@_external_link_args'.format(impl))
@@ -54,9 +58,11 @@ endif
 libkoishi = library('koishi',
     koishi_src,
     c_args : koishi_args,
+    cpp_args : koishi_args,
     gnu_symbol_visibility : 'hidden',
     implicit_include_directories : false,
     include_directories : koishi_incdirs,
+    dependencies : koishi_deps,
     install : not meson.is_subproject(),
     soversion : soversion,
 )

@@ -3,19 +3,18 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "../stack_alloc.h"
+#ifdef __cplusplus
+}
+#endif
+
+#ifndef USE_BOOST_FCONTEXT
 
 typedef struct fcontext *fcontext_t;
-
-typedef struct fcontext_fiber {
-	fcontext_t fctx;
-	char *stack;
-	size_t stack_size;
-	KOISHI_VALGRIND_STACK_ID(valgrind_stack_id)
-} koishi_fiber_t;
-
-#include "../fiber.h"
-
 typedef struct transfer_t {
     fcontext_t fctx;
     void *data;
@@ -27,13 +26,24 @@ fcontext_t FCONTEXT_CALL make_fcontext(void *sp, size_t size, void (*fn)(transfe
 // NOTE: currently unused
 transfer_t FCONTEXT_CALL ontop_fcontext(const fcontext_t to, void *vp, transfer_t (*fn)(transfer_t));
 
+#endif
+
+typedef struct fcontext_fiber {
+	fcontext_t fctx;
+	char *stack;
+	size_t stack_size;
+	KOISHI_VALGRIND_STACK_ID(valgrind_stack_id)
+} koishi_fiber_t;
+
+#include "../fiber.h"
+
 static void koishi_fiber_swap(koishi_fiber_t *from, koishi_fiber_t *to) {
 	transfer_t tf = jump_fcontext(to->fctx, from);
-	from = tf.data;
+	from = (koishi_fiber_t*)tf.data;
 	from->fctx = tf.fctx;
 }
 
-static KOISHI_NORETURN void co_entry(transfer_t tf) {
+KOISHI_NORETURN static void co_entry(transfer_t tf) {
 	koishi_coroutine_t *co = co_current;
 	assert(tf.data == &co->caller->fiber);
 	((koishi_fiber_t*)tf.data)->fctx = tf.fctx;
@@ -50,7 +60,7 @@ static inline void init_fiber_fcontext(koishi_fiber_t *fiber) {
 }
 
 static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size) {
-	fiber->stack = alloc_stack(min_stack_size, &fiber->stack_size);
+	fiber->stack = (char*)alloc_stack(min_stack_size, &fiber->stack_size);
 	KOISHI_VALGRIND_STACK_REGISTER(fiber->valgrind_stack_id, fiber->stack, fiber->stack + fiber->stack_size);
 	init_fiber_fcontext(fiber);
 }

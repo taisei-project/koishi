@@ -12,6 +12,7 @@ else
 endif
 
 ucontext_src = files('ucontext.c')
+ucontext_deps = []
 ucontext_args = []
 ucontext_external_args = []
 ucontext_external_link_args = []
