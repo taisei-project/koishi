@@ -57,6 +57,12 @@ if cc.has_function('mmap', args : feature_args)
     elif cc.has_header_symbol('sys/mman.h', 'MAP_ANON', args : feature_args)
         koishi_args += ['-DKOISHI_HAVE_MMAP', '-DKOISHI_MAP_ANONYMOUS=MAP_ANON']
     endif
+
+    if cc.has_header_symbol('sys/mman.h', 'MAP_STACK', args : feature_args)
+        koishi_args += ['-DKOISHI_MAP_STACK=MAP_STACK']
+    else
+        koishi_args += ['-DKOISHI_MAP_STACK=0']
+    endif
 endif
 
 can_get_page_size = false
