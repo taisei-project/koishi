@@ -113,7 +113,7 @@ typedef struct koishi_coroutine {
 	 * @brief Private data reserved for the implementation. Don't mess with it.
 	 * @private
 	 */
-	void *_private[8];
+	void *_private[16];
 #ifdef BUILDING_KOISHI
 };
 #else
