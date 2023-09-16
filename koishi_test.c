@@ -103,6 +103,40 @@ void cancelled_caller_test(int *result) {
 	koishi_deinit(&outer);
 }
 
+void *counter(void *a) {
+	(void)a;
+
+	for(int i = 0;; ++i, koishi_yield(NULL)) {
+		printf("%i\n", i);
+	}
+}
+
+void *counter_creator(void *a) {
+	koishi_coroutine_t *co_counter = a;
+	koishi_init(co_counter, 0, counter);
+
+	printf("Counting from creator:\n");
+	koishi_resume(co_counter, NULL);
+	koishi_resume(co_counter, NULL);
+	koishi_resume(co_counter, NULL);
+
+	return NULL;
+}
+
+void resume_from_another_test(void) {
+	koishi_coroutine_t co_counter, co_creator;
+	koishi_init(&co_creator, 0, counter_creator);
+	koishi_resume(&co_creator, &co_counter);
+
+	printf("Counting from main:\n");
+	koishi_resume(&co_counter, NULL);
+	koishi_resume(&co_counter, NULL);
+	koishi_resume(&co_counter, NULL);
+
+	koishi_deinit(&co_creator);
+	koishi_deinit(&co_counter);
+}
+
 int main(int argc, char **argv) {
 	if(argc != 1) {
 		printf("%s takes no arguments.\n", argv[0]);
@@ -134,6 +168,8 @@ int main(int argc, char **argv) {
 	int result = 0;
 	cancelled_caller_test(&result);
 	assert(result == 42);
+
+	resume_from_another_test();
 
 	printf("Done\n");
 	return 0;
