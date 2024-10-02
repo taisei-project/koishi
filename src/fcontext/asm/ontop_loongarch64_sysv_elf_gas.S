@@ -1,10 +1,3 @@
-/*
-            Copyright Jiaxun Yang 2018.
-   Distributed under the Boost Software License, Version 1.0.
-      (See accompanying file LICENSE_1_0.txt or copy at
-          http://www.boost.org/LICENSE
-*/
-
 /*******************************************************
  *                                                     *
  *  -------------------------------------------------  *
@@ -12,14 +5,14 @@
  *  -------------------------------------------------  *
  *  |     0     |     8     |    16     |     24    |  *
  *  -------------------------------------------------  *
- *  |    F24    |    F25    |    F26    |    F27    |  *
+ *  |    FS0    |    FS1    |    FS2    |    FS3    |  *
  *  -------------------------------------------------  *
  *  -------------------------------------------------  *
  *  |  8  |  9  |  10 |  11 |  12 |  13 |  14 |  15 |  *
  *  -------------------------------------------------  *
  *  |     32    |    40     |     48    |     56    |  *
  *  -------------------------------------------------  *
- *  |    F28    |    F29    |    F30    |    F31    |  *
+ *  |    FS4    |    FS5    |    FS6    |    FS7    |  *
  *  -------------------------------------------------  *
  *  -------------------------------------------------  *
  *  |  16 |  17 |  18 |  19 |  20 |  21 |  22 |  23 |  *
@@ -40,83 +33,85 @@
  *  -------------------------------------------------  *
  *  | 128 | 132 | 136 | 140 | 144 | 148 | 152 | 156 |  *
  *  -------------------------------------------------  *
- *  |    FP     |    GP     |     RA    |     PC    |  *
+ *  |    S8     |    FP     |     RA    |     PC    |  *
  *  -------------------------------------------------  *
  *                                                     *
  * *****************************************************/
 
-.file "ontop_mips64_n64_elf_gas.S"
+.file "ontop_loongarch64_sysv_elf_gas.S"
 .text
 .globl ontop_fcontext
-.align 3
+.align 2
 .type ontop_fcontext,@function
-.ent ontop_fcontext
 ontop_fcontext:
     # reserve space on stack
-    daddiu $sp, $sp, -160
+    addi.d  $sp, $sp, -160
 
-    sd  $s0, 64($sp)  # save S0
-    sd  $s1, 72($sp)  # save S1
-    sd  $s2, 80($sp)  # save S2
-    sd  $s3, 88($sp)  # save S3
-    sd  $s4, 96($sp)  # save S4
-    sd  $s5, 104($sp) # save S5
-    sd  $s6, 112($sp) # save S6
-    sd  $s7, 120($sp) # save S7
-    sd  $fp, 128($sp) # save FP
-    sd  $ra, 144($sp) # save RA
-    sd  $ra, 152($sp) # save RA as PC
+    # save fs0 - fs7
+    fst.d  $fs0, $sp, 0
+    fst.d  $fs1, $sp, 8
+    fst.d  $fs2, $sp, 16
+    fst.d  $fs3, $sp, 24
+    fst.d  $fs4, $sp, 32
+    fst.d  $fs5, $sp, 40
+    fst.d  $fs6, $sp, 48
+    fst.d  $fs7, $sp, 56
 
-#if defined(__mips_hard_float)
-    s.d  $f24, 0($sp)   # save F24
-    s.d  $f25, 8($sp)   # save F25
-    s.d  $f26, 16($sp)  # save F26
-    s.d  $f27, 24($sp)  # save F27
-    s.d  $f28, 32($sp)  # save F28
-    s.d  $f29, 40($sp)  # save F29
-    s.d  $f30, 48($sp)  # save F30
-    s.d  $f31, 56($sp)  # save F31
-#endif
+    # save s0 - s8, fp, ra
+    st.d  $s0, $sp, 64
+    st.d  $s1, $sp, 72
+    st.d  $s2, $sp, 80
+    st.d  $s3, $sp, 88
+    st.d  $s4, $sp, 96
+    st.d  $s5, $sp, 104
+    st.d  $s6, $sp, 112
+    st.d  $s7, $sp, 120
+    st.d  $s8, $sp, 128
+    st.d  $fp, $sp, 136
+    st.d  $ra, $sp, 144
 
-    # store SP (pointing to context-data) in t0
-    move  $t0, $sp
+    # save RA as PC
+    st.d  $ra, $sp, 152
 
-    # restore SP (pointing to context-data) from a0
+    # store SP (pointing to context-data) in A3
+    move  $a3, $sp
+
+    # restore SP (pointing to context-data) from A0
     move  $sp, $a0
 
-#if defined(__mips_hard_float)
-    l.d  $f24, 0($sp)   # restore F24
-    l.d  $f25, 8($sp)   # restore F25
-    l.d  $f26, 16($sp)  # restore F26
-    l.d  $f27, 24($sp)  # restore F27
-    l.d  $f28, 32($sp)  # restore F28
-    l.d  $f29, 40($sp)  # restore F29
-    l.d  $f30, 48($sp)  # restore F30
-    l.d  $f31, 56($sp)  # restore F31
-#endif
+    # load fs0 - fs11
+    fld.d  $fs0, $sp, 0
+    fld.d  $fs1, $sp, 8
+    fld.d  $fs2, $sp, 16
+    fld.d  $fs3, $sp, 24
+    fld.d  $fs4, $sp, 32
+    fld.d  $fs5, $sp, 40
+    fld.d  $fs6, $sp, 48
+    fld.d  $fs7, $sp, 56
 
-    ld  $s0, 64($sp)  # restore S0
-    ld  $s1, 72($sp)  # restore S1
-    ld  $s2, 80($sp)  # restore S2
-    ld  $s3, 88($sp)  # restore S3
-    ld  $s4, 96($sp)  # restore S4
-    ld  $s5, 104($sp) # restore S5
-    ld  $s6, 112($sp) # restore S6
-    ld  $s7, 120($sp) # restore S7
-    ld  $fp, 128($sp) # restore FP
-    ld  $ra, 144($sp) # restore RA
+    #load s0 - s11, fp, ra
+    ld.d  $s0, $sp, 64
+    ld.d  $s1, $sp, 72
+    ld.d  $s2, $sp, 80
+    ld.d  $s3, $sp, 88
+    ld.d  $s4, $sp, 96
+    ld.d  $s5, $sp, 104
+    ld.d  $s6, $sp, 112
+    ld.d  $s7, $sp, 120
+    ld.d  $s8, $sp, 128
+    ld.d  $fp, $sp, 136
+    ld.d  $ra, $sp, 144
 
-    # load PC
-    move $t9, $a2
+    # return transfer_t from jump
+    # pass transfer_t as first arg in context function
+    # a0 == FCTX, a1 == DATA
+    move  $a0, $a3
 
     # adjust stack
-    daddiu $sp, $sp, 160
-
-    move  $a0, $t0 # move param from t0 to a0 as param
+    addi.d  $sp, $sp, 160
 
     # jump to context
-    jr  $t9
-.end ontop_fcontext
+    jr  $a2
 .size ontop_fcontext, .-ontop_fcontext
 
 /* Mark that we don't need executable stack.  */

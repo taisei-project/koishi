@@ -35,6 +35,10 @@ elif arch == 'arm'
 elif arch == 'mips'
     fcontext_arch = 'mips32'
     fcontext_abi = 'o32'
+elif arch == 'sparc64'
+    fcontext_arch = 'sparc64'
+elif arch == 'loongarch64'
+    fcontext_arch = 'loongarch64'
 else
     fcontext_arch = arch
 endif
