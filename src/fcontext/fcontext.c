@@ -32,21 +32,48 @@ typedef struct fcontext_fiber {
 	fcontext_t fctx;
 	char *stack;
 	size_t stack_size;
+	#if defined KOISHI_ASAN
+	void *asan_fake_stack;
+	#endif
 	KOISHI_VALGRIND_STACK_ID(valgrind_stack_id)
 } koishi_fiber_t;
 
 #include "../fiber.h"
 
+static inline void finish_fiber_swap(transfer_t *tf) {
+	koishi_fiber_t *from = (koishi_fiber_t*)tf->data;
+	from->fctx = tf->fctx;
+
+	#if defined KOISHI_ASAN
+	const void *old_bottom;
+	size_t old_size;
+
+	__sanitizer_finish_switch_fiber(from->asan_fake_stack, (const void**)&old_bottom, &old_size);
+
+	if(from->stack) {
+		assert(from->stack == old_bottom);
+		assert(from->stack_size == old_size);
+	} else {
+		from->stack = (void*)old_bottom;
+		from->stack_size = old_size;
+	}
+	#endif
+}
+
 static void koishi_fiber_swap(koishi_fiber_t *from, koishi_fiber_t *to) {
+	#if defined KOISHI_ASAN
+	// FIXME potential fake stack leak
+	__sanitizer_start_switch_fiber(&from->asan_fake_stack, to->stack, to->stack_size);
+	#endif
+
 	transfer_t tf = jump_fcontext(to->fctx, from);
-	from = (koishi_fiber_t*)tf.data;
-	from->fctx = tf.fctx;
+	finish_fiber_swap(&tf);
 }
 
 KOISHI_NORETURN static void co_entry(transfer_t tf) {
 	koishi_coroutine_t *co = co_current;
 	assert(tf.data == &co->caller->fiber);
-	((koishi_fiber_t*)tf.data)->fctx = tf.fctx;
+	finish_fiber_swap(&tf);
 	koishi_entry(co);
 }
 

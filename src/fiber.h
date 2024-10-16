@@ -22,7 +22,7 @@ struct koishi_coroutine {
 
 static_assert(sizeof(struct koishi_coroutine) <= sizeof(struct koishi_coroutine_pub), "struct koishi_coroutine is too large");
 
-#define KOISHI_FIBER_TO_COROUTINE(fib) (koishi_coroutine_t*)(((char*)(fib)) - offsetof(koishi_coroutine_t, fiber))
+#define KOISHI_FIBER_TO_COROUTINE(fib) ((koishi_coroutine_t*)(((char*)(fib)) - offsetof(koishi_coroutine_t, fiber)))
 
 static void koishi_fiber_deinit(koishi_fiber_t *fiber);
 static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size);
