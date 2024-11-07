@@ -4,6 +4,25 @@
 #include <stdlib.h>
 #include <assert.h>
 
+// Lifted from https://github.com/llvm/llvm-project/blob/release/16.x/clang/lib/Headers/cet.h
+#ifndef __CET__
+# define _CET_ENDBR ((void)0)
+#else
+# ifdef __LP64__
+#  if __CET__ & 0x1
+#    define _CET_ENDBR __asm("endbr64")
+#  else
+#    define _CET_ENDBR ((void)0)
+#  endif
+# else
+#  if __CET__ & 0x1
+#    define _CET_ENDBR __asm("endbr32")
+#  else
+#    define _CET_ENDBR ((void)0)
+#  endif
+# endif
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -67,6 +86,7 @@ static void koishi_fiber_swap(koishi_fiber_t *from, koishi_fiber_t *to) {
 	#endif
 
 	transfer_t tf = jump_fcontext(to->fctx, from);
+	_CET_ENDBR;
 	finish_fiber_swap(&tf);
 }
 
