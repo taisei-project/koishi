@@ -1,6 +1,6 @@
 project('koishi', 'c',
     version : '0.1',
-    meson_version : '>=0.48.0',
+    meson_version : '>=0.54.0',
     default_options : [
         'c_std=c11',
         'default_library=static',
@@ -12,7 +12,7 @@ soversion = meson.project_version()
 
 os = host_machine.system()
 arch = host_machine.cpu_family()
-os_is_windows = (os == 'windows' or os == 'uwp' or os == 'cygwin')
+os_is_windows = (os == 'windows' or os == 'cygwin')
 os_is_emscripten = (os == 'emscripten')
 
 cc = meson.get_compiler('c')

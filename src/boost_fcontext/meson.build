@@ -1,7 +1,7 @@
 
 boost_fcontext_supported = false
 
-if not add_languages('cpp', required : false)
+if not add_languages('cpp', required : false, native : false)
     subdir_done()
 endif
 
