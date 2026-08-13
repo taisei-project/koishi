@@ -8,6 +8,7 @@ koishi_deps = []
 backends = [
     'fcontext',
     'boost_fcontext',
+    'boost_callcc',
     'win32fiber',
     'emscripten',
     'ucontext_e2k',
