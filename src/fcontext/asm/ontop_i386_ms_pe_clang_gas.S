@@ -126,6 +126,3 @@ _ontop_fcontext:
 
     /* jump to context */
     jmp  *%ecx
-
-.section .drectve
-.ascii " -export:\"_ontop_fcontext\""
