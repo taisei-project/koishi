@@ -31,8 +31,6 @@ feature_args = [
     '-D_DARWIN_C_SOURCE',
     '-D_DEFAULT_SOURCE',
     '-D_GNU_SOURCE',
-    '-D_POSIX_C_SOURCE=200809L',
-    '-D_XOPEN_SOURCE=700',
 ]
 
 koishi_args = []
