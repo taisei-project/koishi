@@ -5,7 +5,12 @@
 /**
  * @brief Annotates all publicly visible API functions
  */
-#if defined _WIN32 || defined __CYGWIN__
+#if defined KOISHI_STATIC
+	#if !defined BUILDING_KOISHI
+		#error KOISHI_STATIC defined without BUILDING_KOISHI
+	#endif
+	#define KOISHI_API
+#elif defined _WIN32 || defined __CYGWIN__
 	#if defined BUILDING_KOISHI
 		#define KOISHI_API __declspec(dllexport)
 	#elif defined KOISHI_DLLIMPORT
