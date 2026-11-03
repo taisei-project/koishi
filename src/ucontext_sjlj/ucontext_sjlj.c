@@ -15,6 +15,7 @@ typedef struct uctx_fiber {
 typedef uctx_fiber_t *koishi_fiber_t;
 
 #define KOISHI_FIBER_MANAGED_STACK
+#define KOISHI_FIBER_ASAN_ANNOTATIONS
 #include "../fiber.h"
 
 static KOISHI_THREAD_LOCAL uctx_fiber_t co_main_fiber;
@@ -30,7 +31,19 @@ typedef union entry_params {
 static KOISHI_NORETURN void co_entry(int p0, int p1, int p2, int p3) {
 	entry_params_t ep = { .as_int = { p0, p1, p2, p3 } };
 
+	// init and recycle jump here with swapcontext to set up the jmp_buf inside the fiber
+	// this must be manually ASan-annotated, fiber.h doesn't know about this
+
+#if defined KOISHI_FIBER_ASAN
+	const void *caller_stack;
+	size_t caller_stack_size;
+	__sanitizer_finish_switch_fiber(NULL, &caller_stack, &caller_stack_size);
+#endif
+
 	if(koishi_setjmp((*ep.this_fiber)->jmp) == 0) {
+#if defined KOISHI_FIBER_ASAN
+		__sanitizer_start_switch_fiber(NULL, caller_stack, caller_stack_size);
+#endif
 		setcontext(ep.temp);
 	}
 
@@ -52,7 +65,17 @@ static void koishi_fiber_recycle(koishi_fiber_t *fiber) {
 	ep.this_fiber = fiber;
 	ep.temp = &temp;
 	makecontext(uctx, (void(*)(void))co_entry, 4, ep.as_int[0], ep.as_int[1], ep.as_int[2], ep.as_int[3]);
+
+#if defined KOISHI_FIBER_ASAN
+	void *fake_stack;  // NOTE: necessary, otherwise ASan will eat the caller's fake stack
+	__sanitizer_start_switch_fiber(&fake_stack, uctx->uc_stack.ss_sp, uctx->uc_stack.ss_size);
+#endif
+
 	swapcontext(&temp, uctx);
+
+#if defined KOISHI_FIBER_ASAN
+	__sanitizer_finish_switch_fiber(fake_stack, NULL, NULL);
+#endif
 }
 
 static void koishi_fiber_swap(koishi_fiber_t *from, koishi_fiber_t *to) {
