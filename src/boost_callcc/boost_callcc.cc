@@ -1,10 +1,5 @@
 
 #include <koishi.h>
-#include <string.h>
-
-extern "C" {
-	#include "../stack_alloc.h"
-}
 
 #include <boost/context/continuation.hpp>
 #include <new>
@@ -17,10 +12,9 @@ typedef struct boost_fiber {
 	alignas(bctx::continuation) char cc_storage[sizeof(bctx::continuation)];
 	struct boost_fiber *from;
 	struct boost_fiber *next;
-	char *stack;
-	size_t stack_size;
 } koishi_fiber_t;
 
+#define KOISHI_FIBER_MANAGED_STACK
 #include "../fiber.h"
 
 static inline bctx::continuation &fiber_cc(koishi_fiber_t *fiber) {
@@ -39,13 +33,13 @@ struct fake_allocator {
 	void deallocate(bctx::stack_context&) noexcept { }
 };
 
-static void koishi_fiber_init_callcc(koishi_fiber_t *fiber) {
-	fiber->from = nullptr;
-	fiber->next = nullptr;
+static void koishi_fiber_init_callcc(koishi_fiber_t *fiber, void *stack, size_t stack_size) {
 	new (fiber->cc_storage) bctx::continuation();
 
 	fiber->from = &koishi_active()->fiber;
-	fiber_cc(fiber) = bctx::callcc(std::allocator_arg, fake_allocator(fiber->stack, fiber->stack_size),
+	fiber->next = nullptr;
+
+	fiber_cc(fiber) = bctx::callcc(std::allocator_arg, fake_allocator(stack, stack_size),
 		[fiber](bctx::continuation && c) {
 			c = c.resume();
 			fiber_cc(fiber->from) = std::move(c);
@@ -62,8 +56,9 @@ static void koishi_fiber_init_callcc(koishi_fiber_t *fiber) {
 }
 
 static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size) {
-	fiber->stack = (char*)alloc_stack(min_stack_size, &fiber->stack_size);
-	koishi_fiber_init_callcc(fiber);
+	size_t stack_size;
+	void *stack = koishi_fiber_alloc_stack(fiber, min_stack_size, &stack_size);
+	koishi_fiber_init_callcc(fiber, stack, stack_size);
 }
 
 static void koishi_fiber_init_main(koishi_fiber_t *fiber) {
@@ -73,16 +68,14 @@ static void koishi_fiber_init_main(koishi_fiber_t *fiber) {
 
 static void koishi_fiber_recycle(koishi_fiber_t *fiber) {
 	fiber_cc(fiber).~continuation();
-	koishi_fiber_init_callcc(fiber);
+	size_t stack_size;
+	void *stack = koishi_fiber_get_stack(fiber, &stack_size);
+	koishi_fiber_init_callcc(fiber, stack, stack_size);
 }
 
 static void koishi_fiber_deinit(koishi_fiber_t *fiber) {
 	fiber_cc(fiber).~continuation();
-
-	if(fiber->stack) {
-		free_stack(fiber->stack, fiber->stack_size);
-		fiber->stack = nullptr;
-	}
+	koishi_fiber_free_stack(fiber);
 }
 
 static void do_jump(koishi_fiber_t *from, koishi_fiber_t *to) {
@@ -115,9 +108,4 @@ static void koishi_fiber_swap(koishi_fiber_t *from, koishi_fiber_t *to) {
 		main_fiber->next = to;
 		do_jump(from, main_fiber);
 	}
-}
-
-KOISHI_API void *koishi_get_stack(koishi_coroutine_t *co, size_t *stack_size) {
-	if(stack_size) *stack_size = co->fiber.stack_size;
-	return co->fiber.stack;
 }

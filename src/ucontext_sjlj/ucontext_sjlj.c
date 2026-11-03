@@ -1,19 +1,20 @@
 
 #include <koishi.h>
-#include <ucontext.h>
+
 #include <assert.h>
 #include <stdlib.h>
-#include "../stack_alloc.h"
+#include <ucontext.h>
+
 #include "../sjlj.h"
 
 typedef struct uctx_fiber {
 	ucontext_t uctx;
 	koishi_jmp_buf jmp;
-	KOISHI_VALGRIND_STACK_ID(valgrind_stack_id)
 } uctx_fiber_t;
 
 typedef uctx_fiber_t *koishi_fiber_t;
 
+#define KOISHI_FIBER_MANAGED_STACK
 #include "../fiber.h"
 
 static KOISHI_THREAD_LOCAL uctx_fiber_t co_main_fiber;
@@ -40,8 +41,7 @@ static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size) {
 	*fiber = calloc(1, sizeof(**fiber));
 	ucontext_t *uctx = &(*fiber)->uctx;
 	getcontext(uctx);
-	uctx->uc_stack.ss_sp = alloc_stack(min_stack_size, &uctx->uc_stack.ss_size);
-	KOISHI_VALGRIND_STACK_REGISTER((*fiber)->valgrind_stack_id, uctx->uc_stack.ss_sp, (char*)uctx->uc_stack.ss_sp + uctx->uc_stack.ss_size);
+	uctx->uc_stack.ss_sp = koishi_fiber_alloc_stack(fiber, min_stack_size, &uctx->uc_stack.ss_size);
 	koishi_fiber_recycle(fiber);
 }
 
@@ -67,19 +67,7 @@ static void koishi_fiber_init_main(koishi_fiber_t *fiber) {
 }
 
 static void koishi_fiber_deinit(koishi_fiber_t *fiber) {
-	if(*fiber) {
-		ucontext_t *uctx = &(*fiber)->uctx;
-		if(uctx->uc_stack.ss_sp) {
-			KOISHI_VALGRIND_STACK_DEREGISTER((*fiber)->valgrind_stack_id);
-			free_stack(uctx->uc_stack.ss_sp, uctx->uc_stack.ss_size);
-		}
-
-		free(*fiber);
-		*fiber = NULL;
-	}
-}
-
-KOISHI_API void *koishi_get_stack(koishi_coroutine_t *co, size_t *stack_size) {
-	if(stack_size) *stack_size = co->fiber->uctx.uc_stack.ss_size;
-	return co->fiber->uctx.uc_stack.ss_sp;
+	koishi_fiber_free_stack(fiber);
+	free(*fiber);
+	*fiber = NULL;
 }

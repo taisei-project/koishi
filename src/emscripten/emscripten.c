@@ -7,8 +7,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "../stack_alloc.h"
-
 typedef struct em_fiber_data {
 	emscripten_fiber_t em_fiber;
 	char asyncify_stack[4096];
@@ -17,9 +15,11 @@ typedef struct em_fiber_data {
 
 typedef struct koishi_em_fiber {
 	em_fiber_data_t *data;
-	size_t data_size;
 } koishi_fiber_t;
 
+#define KOISHI_FIBER_MANAGED_STACK
+#define KOISHI_FIBER_ASAN_ANNOTATIONS  /* NOTE: Untested */
+#define KOISHI_FIBER_MANAGED_STACK_CUSTOM_GET_STACK
 #include "../fiber.h"
 
 static KOISHI_THREAD_LOCAL em_fiber_data_t em_fiber_data_main;
@@ -30,8 +30,9 @@ KOISHI_NORETURN static void co_entry(void *fiber) {
 
 static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size) {
 	size_t control_size = sizeof *fiber->data;
-	fiber->data = alloc_stack(min_stack_size + control_size, &fiber->data_size);
-	size_t stack_size = fiber->data_size - control_size;
+	size_t full_size;
+	fiber->data = koishi_fiber_alloc_stack(fiber, min_stack_size + control_size, &full_size);
+	size_t stack_size = full_size - control_size;
 
 	em_fiber_data_t *const d = fiber->data;
 	emscripten_fiber_init(
@@ -48,11 +49,8 @@ static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size) {
 }
 
 static void koishi_fiber_deinit(koishi_fiber_t *fiber) {
-	if(fiber->data_size) {
-		free_stack(fiber->data, fiber->data_size);
-		fiber->data = NULL;
-		fiber->data_size = 0;
-	}
+	koishi_fiber_free_stack(fiber);
+	fiber->data = NULL;
 }
 
 static void koishi_fiber_init_main(koishi_fiber_t *fiber) {
@@ -76,6 +74,9 @@ static void koishi_fiber_swap(koishi_fiber_t *from, koishi_fiber_t *to) {
 	emscripten_fiber_swap(&from->data->em_fiber, &to->data->em_fiber);
 }
 
+// FIXME: should we just let generic fiber.h code return the full stack here?
+// koishi_get_stack() docs say that arbitrary control structures may be stored on the stack and makes
+// no promises about the layout.
 KOISHI_API void *koishi_get_stack(koishi_coroutine_t *co, size_t *stack_size) {
 	emscripten_fiber_t *f = &co->fiber.data->em_fiber;
 	if(stack_size) *stack_size = (ptrdiff_t)((char*)f->stack_base - (char*)f->stack_limit);
