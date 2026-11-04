@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ucontext.h>
 
 #include "../sjlj.h"
@@ -10,6 +11,7 @@
 typedef struct uctx_fiber {
 	ucontext_t uctx;
 	koishi_jmp_buf jmp;
+	koishi_jmp_buf entry;
 } uctx_fiber_t;
 
 typedef uctx_fiber_t *koishi_fiber_t;
@@ -29,9 +31,10 @@ typedef union entry_params {
 } entry_params_t;
 
 static KOISHI_NORETURN void co_entry(int p0, int p1, int p2, int p3) {
-	entry_params_t ep = { .as_int = { p0, p1, p2, p3 } };
+	// NOTE: triggers -Wclobbered without volatile
+	volatile entry_params_t ep = { .as_int = { p0, p1, p2, p3 } };
 
-	// init and recycle jump here with swapcontext to set up the jmp_buf inside the fiber
+	// init jumps here with swapcontext to set up the jmp_buf inside the fiber
 	// this must be manually ASan-annotated, fiber.h doesn't know about this
 
 #if defined KOISHI_FIBER_ASAN
@@ -40,14 +43,14 @@ static KOISHI_NORETURN void co_entry(int p0, int p1, int p2, int p3) {
 	__sanitizer_finish_switch_fiber(NULL, &caller_stack, &caller_stack_size);
 #endif
 
-	if(koishi_setjmp((*ep.this_fiber)->jmp) == 0) {
+	if(koishi_setjmp((*ep.this_fiber)->entry) == 0) {
 #if defined KOISHI_FIBER_ASAN
 		__sanitizer_start_switch_fiber(NULL, caller_stack, caller_stack_size);
 #endif
 		setcontext(ep.temp);
 	}
 
-	koishi_entry(KOISHI_FIBER_TO_COROUTINE(ep.this_fiber));
+	koishi_entry(co_current);
 }
 
 static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size) {
@@ -55,11 +58,7 @@ static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size) {
 	ucontext_t *uctx = &(*fiber)->uctx;
 	getcontext(uctx);
 	uctx->uc_stack.ss_sp = koishi_fiber_alloc_stack(fiber, min_stack_size, &uctx->uc_stack.ss_size);
-	koishi_fiber_recycle(fiber);
-}
 
-static void koishi_fiber_recycle(koishi_fiber_t *fiber) {
-	ucontext_t *uctx = &(*fiber)->uctx;
 	ucontext_t temp;
 	entry_params_t ep = { 0 };
 	ep.this_fiber = fiber;
@@ -76,6 +75,14 @@ static void koishi_fiber_recycle(koishi_fiber_t *fiber) {
 #if defined KOISHI_FIBER_ASAN
 	__sanitizer_finish_switch_fiber(fake_stack, NULL, NULL);
 #endif
+
+	uctx_fiber_t *f = *fiber;
+	memcpy(&f->jmp, &f->entry, sizeof(f->jmp));
+}
+
+static void koishi_fiber_recycle(koishi_fiber_t *fiber) {
+	uctx_fiber_t *f = *fiber;
+	memcpy(&f->jmp, &f->entry, sizeof(f->jmp));
 }
 
 static void koishi_fiber_swap(koishi_fiber_t *from, koishi_fiber_t *to) {
