@@ -1,7 +1,7 @@
 
 boost_callcc_supported = false
 
-if not add_languages('cpp', required : false)
+if not add_languages('cpp', required : false, native : false)
     subdir_done()
 endif
 
@@ -17,4 +17,3 @@ boost_callcc_deps = [boostctx_dep]
 boost_callcc_args = []
 boost_callcc_external_args = []
 boost_callcc_external_link_args = []
-

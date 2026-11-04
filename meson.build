@@ -1,6 +1,6 @@
 project('koishi', 'c',
     version : '0.1',
-    meson_version : '>=0.54.0',
+    meson_version : '>=1.3.0',
     default_options : [
         'c_std=c11',
         'default_library=static',
