@@ -1,5 +1,6 @@
 
 koishi_src = files(
+    'backend_name.c',
     'stack_alloc.c',
 )
 
@@ -55,6 +56,8 @@ if is_auto_pick
 else
     message('Using the @0@ backend (manual)'.format(impl))
 endif
+
+koishi_args += ['-DKOISHI_BACKEND="@0@"'.format(impl)]
 
 libkoishi = library('koishi',
     koishi_src,

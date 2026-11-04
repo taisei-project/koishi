@@ -281,6 +281,15 @@ KOISHI_API koishi_coroutine_t *koishi_active(void);
  */
 
 /**
+ * @brief Query the name of the backend in use.
+ *
+ * Matches the backend name as selected at build time.
+ *
+ * @return The name of the backend, as a pointer to a static string.
+ */
+KOISHI_API const char *koishi_backend(void);
+
+/**
  * @brief Query the coroutine's stack region.
  *
  * @warning This function may not be supported by some backends. Some backends
