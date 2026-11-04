@@ -151,6 +151,8 @@ int main(int argc, char **argv) {
 		iterations = num_iters;
 	}
 
+	printf("Benchmarking koishi backend: %s\n", koishi_backend());
+
 	if(bench_types & BENCH_NESTED) {
 		bench_nested();
 		report("nested:", 2, "switch", "switches");
