@@ -9,7 +9,6 @@
 #include "../sjlj.h"
 
 typedef struct uctx_fiber {
-	ucontext_t uctx;
 	koishi_jmp_buf jmp;
 	koishi_jmp_buf entry;
 } uctx_fiber_t;
@@ -55,22 +54,23 @@ static KOISHI_NORETURN void co_entry(int p0, int p1, int p2, int p3) {
 
 static void koishi_fiber_init(koishi_fiber_t *fiber, size_t min_stack_size) {
 	*fiber = calloc(1, sizeof(**fiber));
-	ucontext_t *uctx = &(*fiber)->uctx;
-	getcontext(uctx);
-	uctx->uc_stack.ss_sp = koishi_fiber_alloc_stack(fiber, min_stack_size, &uctx->uc_stack.ss_size);
+
+	ucontext_t uctx;
+	getcontext(&uctx);
+	uctx.uc_stack.ss_sp = koishi_fiber_alloc_stack(fiber, min_stack_size, &uctx.uc_stack.ss_size);
 
 	ucontext_t temp;
 	entry_params_t ep = { 0 };
 	ep.this_fiber = fiber;
 	ep.temp = &temp;
-	makecontext(uctx, (void(*)(void))co_entry, 4, ep.as_int[0], ep.as_int[1], ep.as_int[2], ep.as_int[3]);
+	makecontext(&uctx, (void(*)(void))co_entry, 4, ep.as_int[0], ep.as_int[1], ep.as_int[2], ep.as_int[3]);
 
 #if defined KOISHI_FIBER_ASAN
 	void *fake_stack;  // NOTE: necessary, otherwise ASan will eat the caller's fake stack
-	__sanitizer_start_switch_fiber(&fake_stack, uctx->uc_stack.ss_sp, uctx->uc_stack.ss_size);
+	__sanitizer_start_switch_fiber(&fake_stack, uctx.uc_stack.ss_sp, uctx.uc_stack.ss_size);
 #endif
 
-	swapcontext(&temp, uctx);
+	swapcontext(&temp, &uctx);
 
 #if defined KOISHI_FIBER_ASAN
 	__sanitizer_finish_switch_fiber(fake_stack, NULL, NULL);
@@ -93,7 +93,6 @@ static void koishi_fiber_swap(koishi_fiber_t *from, koishi_fiber_t *to) {
 
 static void koishi_fiber_init_main(koishi_fiber_t *fiber) {
 	*fiber = &co_main_fiber;
-	getcontext(&co_main_fiber.uctx);
 }
 
 static void koishi_fiber_deinit(koishi_fiber_t *fiber) {
