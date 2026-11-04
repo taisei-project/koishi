@@ -150,10 +150,10 @@ if not meson.is_subproject()
     test('koishi', test_exe)
 
     koishi_bench = executable('koishi_bench', 'koishi_benchmark.c', dependencies : koishi_dep)
-    benchmark('switches co<->co', koishi_bench, args : ['nested'])
-    benchmark('switches co<->main', koishi_bench, args : ['main'])
-    benchmark('recycles', koishi_bench, args : ['recycle'])
-    benchmark('reinits', koishi_bench, args : ['reinit'])
+    benchmark('switches co<->co',   koishi_bench, args : ['nested'],  timeout : 60)
+    benchmark('switches co<->main', koishi_bench, args : ['main'],    timeout : 60)
+    benchmark('recycles',           koishi_bench, args : ['recycle'], timeout : 60)
+    benchmark('reinits',            koishi_bench, args : ['reinit'],  timeout : 60)
 
     install_headers('include/koishi.h', subdir : 'koishi')
 
