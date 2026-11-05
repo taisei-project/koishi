@@ -11,7 +11,9 @@ backends = [
     'boost_fcontext',
     'boost_callcc',
     'win32fiber',
-    'emscripten',
+    # FIXME: emscripten_asyncify is faster but breaks with emscripten assertions, so default to emscripten_fiber for now
+    'emscripten_fiber',
+    'emscripten_asyncify',
     'ucontext_e2k',
     'ucontext',
     'ucontext_sjlj',
