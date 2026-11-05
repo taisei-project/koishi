@@ -219,11 +219,6 @@ static void koishi_swap_coroutine(koishi_coroutine_t *from, koishi_coroutine_t *
 
 static void koishi_return_to_caller(koishi_coroutine_t *from, int state) {
 	assert(from->caller != NULL);
-
-	while(from->caller->state == KOISHI_DEAD) {
-		from->caller = from->caller->caller;
-	}
-
 	assert(from->caller->state == KOISHI_IDLE);
 	koishi_swap_coroutine(from, from->caller, state);
 }
@@ -280,6 +275,17 @@ KOISHI_API void koishi_kill(koishi_coroutine_t *co, void *arg) {
 		koishi_die(arg);
 	} else {
 		assert(co->state == KOISHI_SUSPENDED || co->state == KOISHI_IDLE);
+
+		if(co->state == KOISHI_IDLE) {
+			koishi_coroutine_t *c = koishi_active();
+
+			while(c->caller != co) {
+				c = c->caller;
+			}
+
+			c->caller = co->caller;
+		}
+
 		co->state = KOISHI_DEAD;
 		co->userdata = arg;
 	}
