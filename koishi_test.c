@@ -137,6 +137,69 @@ void resume_from_another_test(void) {
 	koishi_deinit(&co_counter);
 }
 
+void *deinit_reuser(void *data) {
+	(void)data;
+	koishi_yield((void*)1);
+	return (void*)2;
+}
+
+void *deinit_caller_test_inner(void *data) {
+	koishi_coroutine_t **co = data;
+	// co[0] is our caller
+	koishi_kill(co[0], (void*)42);
+	koishi_deinit(co[0]);
+	// likely reuses the stack we've just freed
+	koishi_init(co[1], 0, deinit_reuser);
+	koishi_resume(co[1], NULL);
+	return NULL;
+}
+
+void *deinit_caller_test_outer(void *data) {
+	koishi_coroutine_t **co = data;
+	koishi_resume(co[2], co);
+	abort();  // unreachable
+}
+
+void deinit_caller_test(void) {
+	koishi_coroutine_t inner, outer, reuser;
+	koishi_coroutine_t *co[] = { &outer, &reuser, &inner };
+	koishi_init(&inner, 0, deinit_caller_test_inner);
+	koishi_init(&outer, 0, deinit_caller_test_outer);
+	assert((intptr_t)koishi_resume(&outer, co) == 42);
+	assert((intptr_t)koishi_resume(&reuser, NULL) == 2);
+	koishi_deinit(&inner);
+	koishi_deinit(&reuser);
+}
+
+void *recycle_caller_test_new(void *data) {
+	(void)data;
+	return (void*)43;
+}
+
+void *recycle_caller_test_inner(void *data) {
+	koishi_coroutine_t *outer = data;
+	koishi_kill(outer, (void*)42);
+	koishi_recycle(outer, recycle_caller_test_new);
+	return NULL;
+}
+
+void *recycle_caller_test_outer(void *data) {
+	koishi_coroutine_t *inner = data;
+	koishi_resume(inner, koishi_active());
+	abort();  // unreachable
+}
+
+void recycle_caller_test(void) {
+	koishi_coroutine_t inner, outer;
+	koishi_init(&inner, 0, recycle_caller_test_inner);
+	koishi_init(&outer, 0, recycle_caller_test_outer);
+	assert((intptr_t)koishi_resume(&outer, &inner) == 42);
+	assert(koishi_state(&outer) == KOISHI_SUSPENDED);
+	assert((intptr_t)koishi_resume(&outer, NULL) == 43);
+	koishi_deinit(&inner);
+	koishi_deinit(&outer);
+}
+
 int main(int argc, char **argv) {
 	if(argc != 1) {
 		printf("%s takes no arguments.\n", argv[0]);
@@ -170,6 +233,8 @@ int main(int argc, char **argv) {
 	assert(result == 42);
 
 	resume_from_another_test();
+	deinit_caller_test();
+	recycle_caller_test();
 
 	printf("Done\n");
 	return 0;
