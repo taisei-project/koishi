@@ -247,6 +247,10 @@ KOISHI_NORETURN KOISHI_API void koishi_die(void *arg);
  * to both explicit and implicit yields (e.g. by return from the entry point),
  * recursively.
  *
+ * @bug If @p co gets recycled and resumed while it is in the #KOISHI_IDLE state,
+ * its corresponding #koishi_resume call will return whatever the recycled coroutine
+ * last yielded instead of @p arg.
+ *
  * @param co The coroutine to stop.
  * @param arg Value to return from the corresponding #koishi_resume call.
  */
